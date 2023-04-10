@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "GPT API Companion",
+  "version": "1.0.0",
+  "description": "A Chrome extension for interacting with GPT API",
+  "permissions": ["activeTab", "storage", "contextMenus"],
+  "action": {
+    "default_popup": "public/popup.html",
+    "default_icon": {
+      "16": "public/icon16.png",
+      "48": "public/icon48.png",
+      "128": "public/icon128.png"
+    }
+  },
+  "options_page": "public/options.html",
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["dist/contentScript.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "dist/background.js"
+  },
+  "commands": {
+    "summarize-text": {
+      "suggested_key": {
+        "default": "Alt+G"
+      },
+      "description": "Summarize selected text"
+    }
+  }
+}
