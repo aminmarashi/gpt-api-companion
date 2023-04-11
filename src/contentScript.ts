@@ -1,20 +1,8 @@
-import gptApiClient from "./apiClient";
-import { safeGetSelectedText } from "./utils";
+const messages: Message[] = []
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action === "summarize") {
-    const selectedText = safeGetSelectedText();
-    if (selectedText) {
-      const summary = await gptApiClient.summarize(selectedText);
-      alert(`Summary: ${summary}`);
-    } else {
-      alert("Please select some text to summarize.");
-    }
-  }
-});
-
-chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-  if (request.action === "summarize") {
+    const { safeGetSelectedText, gptApiClient } = await imports();
     const selectedText = safeGetSelectedText();
     if (selectedText) {
       // Fetch the stored API token
@@ -23,7 +11,16 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           // Update the authorization header
           gptApiClient.setApiKey(apiToken);
 
-          const summary = await gptApiClient.summarize(selectedText);
+          messages.push({
+            system: 'you are a summerizer bot'
+          });
+          messages.push({
+            user: selectedText
+          });
+          const summary = await gptApiClient.chat(messages);
+          messages.push({
+            assistant: summary
+          });
           alert(`Summary: ${summary}`);
         } else {
           alert("Please set your GPT API Token in the extension settings.");
@@ -34,3 +31,15 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
   }
 });
+
+async function imports(): Promise<{
+  gptApiClient: typeof import("./apiClient").default;
+  safeGetSelectedText: typeof import("./utils").safeGetSelectedText;
+}> {
+  const gptApiClient = (await import("./apiClient.js")).default;
+  const { safeGetSelectedText } = await import("./utils.js");
+  return {
+    gptApiClient,
+    safeGetSelectedText,
+  }
+}

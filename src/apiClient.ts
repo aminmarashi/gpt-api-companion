@@ -23,22 +23,19 @@ class GPTApiClient {
     return response.json();
   }
 
-  async chat(prompt: string): Promise<string> {
-    const response = await this.post("/v1/engines/davinci-codex/completions", {
-      prompt: prompt,
-      max_tokens: 50,
-      n: 1,
-      stop: null,
-      temperature: 0.5,
+  async chat(messages: Message[]): Promise<string> {
+    const response = await this.post("/v1/chat/completions", {
+      messages: messages.map((message) => {
+        const [role] = Object.keys(message);
+        return {
+          role,
+          content: message[role as keyof Message],
+        }
+      }),
+      model: "gpt-3.5-turbo"
     });
 
-    return response.data.choices[0].text.trim();
-  }
-
-  async summarize(text: string): Promise<string> {
-    const prompt = `Please summarize the following text:\n\n${text}\n\nSummary:`;
-
-    return this.chat(prompt);
+    return response.choices[0].message.content;
   }
 }
 

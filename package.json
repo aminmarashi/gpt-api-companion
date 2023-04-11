@@ -6,14 +6,25 @@
   "repository": "git@github.com:aminmarashi/gpt-api-companion.git",
   "author": "Amin Marashi <me@amin.codes>",
   "license": "MIT",
+  "type": "module",
   "scripts": {
-    "build": "tsc -w"
+    "build:css": "postcss src/tailwind.css -o dist/tailwind.css",
+    "build:ts": "tsc",
+    "build": "npm run build:css && npm run build:ts",
+    "watch:css": "postcss src/tailwind.css -o dist/tailwind.css -w",
+    "watch:ts": "tsc -w",
+    "watch": "concurrently \"npm run watch:css\" \"npm run watch:ts\""
   },
   "devDependencies": {
     "@types/chrome": "^0.0.228",
     "autoprefixer": "^10.4.14",
+    "concurrently": "^8.0.1",
     "postcss": "^8.4.21",
+    "postcss-cli": "^10.1.0",
     "tailwindcss": "^3.3.1",
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "gpt3-tokenizer": "^1.1.5"
   }
 }

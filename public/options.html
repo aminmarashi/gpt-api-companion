@@ -2,22 +2,42 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GPT API Companion - Options</title>
-  <link rel="stylesheet" href="popup.css" />
+  <link href="../dist/tailwind.css" rel="stylesheet">
 </head>
 
-<body>
-  <div class="container">
-    <h1>GPT API Companion - Settings</h1>
-    <form id="options-form">
-      <label for="api-token">GPT API Token:</label>
-      <input type="text" id="api-token" />
-      <button type="submit">Save</button>
+<body class="bg-gray-100 min-h-screen">
+  <div class="container mx-auto px-4 py-5">
+    <h1 class="text-3xl mb-5">GPT API Companion - Options</h1>
+    <form id="optionsForm">
+      <label for="apiToken" class="block text-sm mb-2">GPT API Token:</label>
+      <input type="password" id="apiToken" name="apiToken" class="w-full rounded p-2 border-gray-300">
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-4">Save</button>
     </form>
+    <hr class="my-5">
+    <h2 class="text-2xl mb-5">Chat with GPT API Companion</h2>
+    <div class="w-full mr-4 bg-white shadow-md rounded p-4">
+      <div id="chatHistory" class="overflow-y-scroll h-96">
+        <!-- Chat history will be added here dynamically -->
+      </div>
+    </div>
+    <div class="w-full">
+      <div id="errorMessage"
+        class="hidden mb-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+        <!-- Error message will be added here dynamically -->
+      </div>
+      <div class="bg-white shadow-md rounded p-4">
+        <form id="chatForm">
+          <textarea id="userInput" type="submit" class="w-full h-32 rounded p-2 border-gray-300"
+            placeholder="Type your message..."></textarea>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-2">Send</button>
+        </form>
+      </div>
+    </div>
   </div>
-  <script src="../dist/options.js"></script>
+  <script type="module" src="../dist/options.js"></script>
 </body>
 
 </html>

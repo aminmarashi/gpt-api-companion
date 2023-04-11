@@ -3,20 +3,32 @@
   "name": "GPT API Companion",
   "version": "1.0.0",
   "description": "A Chrome extension for interacting with GPT API",
-  "permissions": ["activeTab", "storage", "contextMenus"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "contextMenus"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';",
+    "sandbox": "sandbox allow-scripts; script-src 'self' 'https://api.openai.com.com/*'; object-src 'self'"
+  },
   "action": {
-    "default_popup": "public/popup.html",
     "default_icon": {
-      "16": "public/icon16.png",
-      "48": "public/icon48.png",
-      "128": "public/icon128.png"
+      "16": "public/robot-16.png",
+      "48": "public/robot-48.png",
+      "128": "public/robot-128.png"
     }
   },
   "options_page": "public/options.html",
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
-      "js": ["dist/contentScript.js"]
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "dist/contentScript.js"
+      ],
+      "module": true
     }
   ],
   "background": {
