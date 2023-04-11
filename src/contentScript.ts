@@ -1,8 +1,9 @@
+import gptApiClient from "./apiClient";
+import { safeGetSelectedText } from "./utils";
 const messages: Message[] = []
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action === "summarize") {
-    const { safeGetSelectedText, gptApiClient } = await imports();
     const selectedText = safeGetSelectedText();
     if (selectedText) {
       // Fetch the stored API token
@@ -31,15 +32,3 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
   }
 });
-
-async function imports(): Promise<{
-  gptApiClient: typeof import("./apiClient").default;
-  safeGetSelectedText: typeof import("./utils").safeGetSelectedText;
-}> {
-  const gptApiClient = (await import("./apiClient.js")).default;
-  const { safeGetSelectedText } = await import("./utils.js");
-  return {
-    gptApiClient,
-    safeGetSelectedText,
-  }
-}

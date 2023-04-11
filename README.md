@@ -4,7 +4,7 @@ GPT API Companion is a Chrome extension that enhances your experience with the G
 
 ## Features
 
-1. Chat with the GPT API in a popup window or a separate Chrome tab.
+1. Chat with the GPT API in a separate Chrome tab.
 2. Select text on any web page and send it to a customizable prompt via the context menu (right-click) or a keyboard shortcut (Alt+G by default).
 3. Read and summarize entire web pages.
 

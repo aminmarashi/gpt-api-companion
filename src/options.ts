@@ -1,3 +1,6 @@
+import { renderMarkdown } from './markdown';
+import gptApiClient from './apiClient';
+
 const chat: Message[] = []
 document.addEventListener('DOMContentLoaded', () => {
   const optionsForm = document.getElementById('optionsForm') as HTMLFormElement;
@@ -35,13 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const message = userInput.value.trim();
 
     if (message) {
-      appendMessageToHistory('You', message);
+      await appendMessageToHistory('You', message);
       userInput.value = '';
 
       const apiToken = await getApiToken();
 
       if (apiToken) {
-        const gptApiClient = (await import('./apiClient.js')).default
         gptApiClient.setApiKey(apiToken);
         try {
           chat.push({
@@ -51,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
           chat.push({
             assistant: response
           })
-          appendMessageToHistory('GPT API Companion', response);
+          await appendMessageToHistory('GPT API Companion', response);
         } catch (err) {
           console.error(err);
           errorMessage.innerText = 'Something went wrong. Please try again.';
@@ -61,20 +63,20 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Please set your GPT API Token in the extension settings.');
       }
     }
-  });
+    async function appendMessageToHistory(sender: string, message: string) {
+      if (!chatHistory) {
+        throw new Error('Chat history element not found.');
+      }
+      const messageElement = document.createElement('div');
+      messageElement.className = 'my-2';
+      messageElement.innerHTML = `<strong>${sender}:</strong> ${await renderMarkdown(message)}`;
+      chatHistory.appendChild(messageElement);
 
-  function appendMessageToHistory(sender: string, message: string) {
-    if (!chatHistory) {
-      throw new Error('Chat history element not found.');
+      // Scroll chat history to the bottom
+      chatHistory.scrollTop = chatHistory.scrollHeight;
     }
-    const messageElement = document.createElement('div');
-    messageElement.className = 'my-2';
-    messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
-    chatHistory.appendChild(messageElement);
 
-    // Scroll chat history to the bottom
-    chatHistory.scrollTop = chatHistory.scrollHeight;
-  }
+  });
 
   async function getApiToken(): Promise<string> {
     return new Promise((resolve) => {

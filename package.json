@@ -8,23 +8,27 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build:css": "postcss src/tailwind.css -o dist/tailwind.css",
-    "build:ts": "tsc",
+    "build:ts": "esbuild src/background.ts src/contentScript.ts src/options.ts --bundle --outdir=dist --platform=browser --target=es2015",
     "build": "npm run build:css && npm run build:ts",
-    "watch:css": "postcss src/tailwind.css -o dist/tailwind.css -w",
-    "watch:ts": "tsc -w",
+    "watch:css": "postcss styles/*.css --dir dist/styles -w",
+    "watch:ts": "esbuild src/background.ts src/contentScript.ts src/options.ts --bundle --outdir=dist --platform=browser --target=es2015 --watch",
     "watch": "concurrently \"npm run watch:css\" \"npm run watch:ts\""
   },
   "devDependencies": {
     "@types/chrome": "^0.0.228",
+    "@types/markdown-it": "^12.2.3",
     "autoprefixer": "^10.4.14",
     "concurrently": "^8.0.1",
+    "esbuild": "^0.17.16",
     "postcss": "^8.4.21",
     "postcss-cli": "^10.1.0",
     "tailwindcss": "^3.3.1",
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "gpt3-tokenizer": "^1.1.5"
+    "gpt3-tokenizer": "^1.1.5",
+    "highlight.js": "^11.7.0",
+    "markdown-it": "^13.0.1",
+    "punycode": "^2.3.0"
   }
 }
