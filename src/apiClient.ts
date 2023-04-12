@@ -1,3 +1,5 @@
+import { Message } from "./types";
+
 class GPTApiClient {
   constructor(private apiKey?: string, private apiUrl: string = "https://api.openai.com") { }
 

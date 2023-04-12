@@ -12,3 +12,11 @@ export function safeGetSelectedText() {
   }
   return "";
 }
+
+export async function getApiToken(): Promise<string> {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get('apiToken', ({ apiToken }) => {
+      resolve(apiToken);
+    });
+  });
+}

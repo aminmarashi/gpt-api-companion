@@ -1,15 +1,17 @@
 import { renderMarkdown } from './markdown';
 import gptApiClient from './apiClient';
+import { Chat } from './Chat';
+import { getApiToken } from './utils';
 
-const chat: Message[] = []
 document.addEventListener('DOMContentLoaded', () => {
   const optionsForm = document.getElementById('optionsForm') as HTMLFormElement;
   const apiTokenInput = document.getElementById('apiToken') as HTMLInputElement;
   const chatForm = document.getElementById('chatForm') as HTMLFormElement;
   const userInput = document.getElementById('userInput') as HTMLTextAreaElement;
-  const chatHistory = document.getElementById('chatHistory');
+  const chatElement = document.getElementById('chat') as HTMLDivElement;
   const errorMessage = document.getElementById('errorMessage') as HTMLDivElement;
 
+  const chat = new Chat(chatElement);
   chrome.storage.sync.get('apiToken', ({ apiToken }) => {
     apiTokenInput.value = apiToken || '';
   });
@@ -38,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const message = userInput.value.trim();
 
     if (message) {
-      await appendMessageToHistory('You', message);
+      await chat.appendMessage('user', message);
       userInput.value = '';
 
       const apiToken = await getApiToken();
@@ -46,14 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (apiToken) {
         gptApiClient.setApiKey(apiToken);
         try {
-          chat.push({
-            user: message
-          })
-          const response = await gptApiClient.chat(chat);
-          chat.push({
-            assistant: response
-          })
-          await appendMessageToHistory('GPT API Companion', response);
+          const response = await gptApiClient.chat(chat.getMessages());
+          await chat.appendMessage('assistant', response);
         } catch (err) {
           console.error(err);
           errorMessage.innerText = 'Something went wrong. Please try again.';
@@ -63,26 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Please set your GPT API Token in the extension settings.');
       }
     }
-    async function appendMessageToHistory(sender: string, message: string) {
-      if (!chatHistory) {
-        throw new Error('Chat history element not found.');
-      }
-      const messageElement = document.createElement('div');
-      messageElement.className = 'my-2';
-      messageElement.innerHTML = `<strong>${sender}:</strong> ${await renderMarkdown(message)}`;
-      chatHistory.appendChild(messageElement);
-
-      // Scroll chat history to the bottom
-      chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
 
   });
 
-  async function getApiToken(): Promise<string> {
-    return new Promise((resolve) => {
-      chrome.storage.sync.get('apiToken', ({ apiToken }) => {
-        resolve(apiToken);
-      });
-    });
-  }
 });

@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "A Chrome extension for interacting with GPT API",
   "permissions": [
+    "scripting",
     "activeTab",
     "storage",
     "contextMenus"
@@ -37,9 +38,15 @@
   "commands": {
     "summarize-text": {
       "suggested_key": {
-        "default": "Alt+G"
+        "default": "Alt+T"
       },
       "description": "Summarize selected text"
+    },
+    "summarize-page": {
+      "suggested_key": {
+        "default": "Alt+P"
+      },
+      "description": "Summarize page"
     }
   }
 }
