@@ -2,12 +2,13 @@ import { Chat } from "./Chat";
 import gptApiClient from "./apiClient";
 import { getApiToken, safeGetSelectedText } from "./utils";
 
-console.log('loaded')
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
   let summary = document.getElementById('--gpt-api-companion-summary') as HTMLDivElement
   if (!summary) {
     createSummaryWindow();
   }
+  const summaryWindow = document.getElementById('--gpt-api-companion-summary-window') as HTMLDivElement;
+  summaryWindow.classList.remove('hidden');
   summary = document.getElementById('--gpt-api-companion-summary') as HTMLDivElement
   const apiToken = await getApiToken();
   const chat = new Chat(summary);
@@ -46,27 +47,78 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
       }
     }
   });
+});
 
-  function createSummaryWindow() {
-    const windowWrapper = document.createElement('div');
-    windowWrapper.id = '--gpt-api-companion-summary-window';
-    windowWrapper.innerHTML = `
-    <div style="position: absolute; top: 0; background-color: white; color: black; z-index: 10000;" draggable="true">
-      <button id="--gpt-api-companion-window-close" style="border: none; background-color: transparent; cursor: pointer; font-size: 18px;">x</button>
-      <h3>Page Summary</h3>
+function createSummaryWindow() {
+  const windowWrapper = document.createElement('div');
+  windowWrapper.id = '--gpt-api-companion-summary-window';
+  windowWrapper.innerHTML = `
+    <div id="draggable" style="position: fixed; top: 0; background-color: white; color: black; z-index: 10000; padding: 10px; border: 1px solid #ccc; box-sizing: border-box;">
+      <div id="header" style="cursor: move; display: flex; justify-content: space-between; align-items: center;">
+        <h3>Summary</h3>
+        <button id="--gpt-api-companion-window-close" style="border: none; background-color: transparent; cursor: pointer; font-size: 18px;">x</button>
+      </div>
       <div id="--gpt-api-companion-summary" style="margin-bottom: 1rem;">
         <!-- Summary will be displayed here -->
       </div>
       <label for="gpt-summary-question" style="display: block; margin-bottom: .5rem;">Ask a question:</label>
-      <input type="text" id="--gpt-api-companion--question" style="width: 100%; padding: .5rem; border: 1px solid #ccc;" />
+      <input type="text" id="--gpt-api-companion-question" style="width: 100%; padding: .5rem; border: 1px solid #ccc;" />
+      <div id="resizer" style="width: 10px; height: 10px; background-color: #333; position: absolute; right: 0; bottom: 0; cursor: nwse-resize;"></div>
     </div>
   `;
-    document.body.appendChild(windowWrapper);
+  document.body.appendChild(windowWrapper);
 
-    // Attach close button event listener
-    const closeButton = document.getElementById('--gpt-api-companion-window-close');
-    closeButton?.addEventListener('click', () => {
-      windowWrapper.remove();
-    });
+  // Attach close button event listener
+  const closeButton = document.getElementById('--gpt-api-companion-window-close');
+  closeButton?.addEventListener('click', () => {
+    windowWrapper.classList.add('hidden');
+  });
+
+  // Draggable functionality
+  const draggable = document.getElementById('draggable') as HTMLDivElement;
+  const header = document.getElementById('header') as HTMLDivElement;
+
+  header.addEventListener('mousedown', onMouseDown);
+
+  function onMouseDown(e: MouseEvent) {
+    e.preventDefault();
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   }
-});
+
+  function onMouseMove(e: MouseEvent) {
+    draggable.style.left = e.clientX + 'px';
+    draggable.style.top = e.clientY + 'px';
+  }
+
+  function onMouseUp() {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+
+  // Resizable functionality
+  const resizer = document.getElementById('resizer') as HTMLDivElement;
+  resizer.addEventListener('mousedown', onResizeMouseDown);
+
+  function onResizeMouseDown(e: MouseEvent) {
+    e.preventDefault();
+    document.addEventListener('mousemove', onResizeMouseMove);
+    document.addEventListener('mouseup', onResizeMouseUp);
+  }
+
+  function onResizeMouseMove(e: MouseEvent) {
+    const width = e.clientX - draggable.offsetLeft;
+    const height = e.clientY - draggable.offsetTop;
+    draggable.style.width = width + 'px';
+    draggable.style.height = height + 'px';
+  }
+
+  function onResizeMouseUp() {
+    document.removeEventListener('mousemove', onResizeMouseMove);
+    document.removeEventListener('mouseup', onResizeMouseUp);
+  }
+
+  document.body.addEventListener('scroll', () => {
+    draggable.style.top = draggable.offsetTop + window.scrollY + 'px';
+  })
+}
