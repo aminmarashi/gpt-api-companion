@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "description": "A Chrome extension for interacting with GPT API",
   "permissions": [
-    "scripting",
     "activeTab",
     "storage",
     "contextMenus"
@@ -24,7 +23,8 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*/*"
+        "http://*/*",
+        "https://*/*"
       ],
       "js": [
         "dist/contentScript.js"
@@ -34,19 +34,5 @@
   ],
   "background": {
     "service_worker": "dist/background.js"
-  },
-  "commands": {
-    "summarize-text": {
-      "suggested_key": {
-        "default": "Alt+T"
-      },
-      "description": "Summarize selected text"
-    },
-    "summarize-page": {
-      "suggested_key": {
-        "default": "Alt+P"
-      },
-      "description": "Summarize page"
-    }
   }
 }

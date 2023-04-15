@@ -5,7 +5,7 @@ GPT API Companion is a Chrome extension that enhances your experience with the G
 ## Features
 
 1. Chat with the GPT API in a separate Chrome tab.
-2. Select text on any web page and send it to a customizable prompt via the context menu (right-click) or a keyboard shortcut (Alt+G by default).
+2. Select text on any web page and send it to a customizable prompt via the context menu (right-click).
 3. Read and summarize entire web pages.
 
 ## Installation
@@ -40,7 +40,7 @@ yarn build
 
 1. Click on the GPT API Companion icon in the Chrome toolbar to open the chat interface.
 2. Go to the extension settings by right-clicking the GPT API Companion icon and selecting "Options" to set your GPT API Token.
-3. To summarize selected text, select the text on any web page, right-click, and choose "Summarize with GPT API Companion" or use the keyboard shortcut (Alt+G by default).
+3. To summarize selected text, select the text on any web page, right-click, and choose "Summarize with GPT API Companion".
 
 ## Technologies
 
@@ -48,6 +48,8 @@ yarn build
 - HTML
 - Tailwind CSS
 - Chrome Extension APIs
+
+<a href="https://www.patreon.com/bePatron?u=47066749" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 
 ## License
 

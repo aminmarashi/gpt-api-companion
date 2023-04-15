@@ -13,7 +13,9 @@
     "build": "npm run build:css && npm run build:ts",
     "watch:css": "postcss styles/*.css --dir dist/styles -w",
     "watch:ts": "esbuild src/background.ts src/contentScript.ts src/options.ts --bundle --outdir=dist --platform=browser --target=es2015 --watch",
-    "watch": "concurrently \"npm run watch:css\" \"npm run watch:ts\""
+    "watch": "concurrently \"npm run watch:css\" \"npm run watch:ts\"",
+    "prebundle": "npm run build; mkdir pack; cp -r dist public manifest.json pack",
+    "bundle": "zip -r gpt-api-companion.zip pack; rm -rf pack"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.228",
