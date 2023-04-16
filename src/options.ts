@@ -12,10 +12,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatElement = document.getElementById('chat') as HTMLDivElement;
   const errorMessage = document.getElementById('errorMessage') as HTMLDivElement;
   const modelSelect = document.getElementById('model') as HTMLSelectElement;
+  const summerizerModelSelect = document.getElementById('summerizerModel') as HTMLSelectElement;
+  const spinner = document.getElementById('spinner') as HTMLDivElement;
 
   const chat = new Chat(chatElement);
   chrome.storage.sync.get('apiToken', ({ apiToken }) => {
     apiTokenInput.value = apiToken || '';
+  });
+
+  chrome.storage.sync.get('summerizerModel', ({ summerizerModel }) => {
+    if (summerizerModel) {
+      summerizerModelSelect.value = summerizerModel;
+    }
   });
 
   userInput.addEventListener('keydown', (e) => {
@@ -25,12 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  optionsForm.addEventListener('submit', (e) => {
+  optionsForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const apiToken = apiTokenInput.value.trim();
+    const summerizerModel = summerizerModelSelect.value || 'gpt-3.5-turbo';
+    chrome.storage.sync.set({ summerizerModel })
+
     if (apiToken) {
       chrome.storage.sync.set({ apiToken }, () => {
-        alert('GPT API Token saved.');
+        alert('Options are successfully saved.');
       });
     } else {
       alert('Please enter a valid GPT API Token.');
@@ -54,8 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
           gptApiClient.setModel(model);
         }
         try {
+          spinner.classList.remove('hidden');
           const response = await gptApiClient.chat(chat.getMessages());
           await chat.appendMessage('assistant', response);
+          spinner.classList.add('hidden');
         } catch (err) {
           console.error(err);
           errorMessage.innerText = 'Something went wrong. Please try again.';

@@ -11,11 +11,21 @@
 
 <body class="bg-gray-100 min-h-screen">
   <div class="container mx-auto px-4 py-5">
-    <h1 class="text-3xl mb-5">GPT API Companion - Options</h1>
-    <form id="optionsForm">
-      <label for="apiToken" class="block text-sm mb-2">GPT API Token:</label>
-      <input type="password" id="apiToken" name="apiToken" class="w-full rounded p-2 border-gray-300">
-      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-4">Save</button>
+    <h2 class="text-2xl mb-5">GPT API Companion - Options</h2>
+    <form id="optionsForm" class="flex">
+      <div>
+        <label for="apiToken" class="block text-sm mb-2">GPT API Token:</label>
+        <input type="password" id="apiToken" name="apiToken" class="w-full rounded p-2 border-gray-300">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-4">Save</button>
+      </div>
+      <div class="px-8">
+        <label for="summerizerModel" class="block text-sm mb-2">Summerizer Model:</label>
+        <select id="summerizerModel"
+          class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+          <option value="gpt-3.5-turbo" selected>GPT 3.5</option>
+          <option value="gpt-4">GPT 4</option>
+        </select>
+      </div>
     </form>
     <hr class="my-5">
     <h2 class="text-2xl mb-5">Chat with GPT API Companion</h2>
@@ -33,7 +43,56 @@
         <form id="chatForm">
           <textarea id="userInput" type="submit" class="w-full h-32 rounded p-2 border-gray-300"
             placeholder="Type your message..."></textarea>
-          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-2">Send</button>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-2">
+            <span id="spinner" class="mr-1 hidden">
+              <svg class="inline w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <style>
+                  .spinner_jCIR {
+                    animation: spinner_B8Vq .9s linear infinite;
+                    animation-delay: -.9s
+                  }
+
+                  .spinner_upm8 {
+                    animation-delay: -.8s
+                  }
+
+                  .spinner_2eL5 {
+                    animation-delay: -.7s
+                  }
+
+                  .spinner_Rp9l {
+                    animation-delay: -.6s
+                  }
+
+                  .spinner_dy3W {
+                    animation-delay: -.5s
+                  }
+
+                  @keyframes spinner_B8Vq {
+
+                    0%,
+                    66.66% {
+                      animation-timing-function: cubic-bezier(0.36, .61, .3, .98);
+                      y: 6px;
+                      height: 12px
+                    }
+
+                    33.33% {
+                      animation-timing-function: cubic-bezier(0.36, .61, .3, .98);
+                      y: 1px;
+                      height: 22px
+                    }
+                  }
+                </style>
+                <rect class="spinner_jCIR" x="1" y="6" fill="white" width="2.8" height="12" />
+                <rect class="spinner_jCIR spinner_upm8" fill="white" x="5.8" y="6" width="2.8" height="12" />
+                <rect class="spinner_jCIR spinner_2eL5" fill="white" x="10.6" y="6" width="2.8" height="12" />
+                <rect class="spinner_jCIR spinner_Rp9l" fill="white" x="15.4" y="6" width="2.8" height="12" />
+                <rect class="spinner_jCIR spinner_dy3W" fill="white" x="20.2" y="6" width="2.8" height="12" />
+              </svg>
+            </span>
+            Send
+          </button>
           <!-- a drop down to select the GPT model -->
           <select id="model"
             class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">

@@ -20,3 +20,11 @@ export async function getApiToken(): Promise<string> {
     });
   });
 }
+
+export async function getSummerizerModel(): Promise<string> {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get('summerizerModel', ({ summerizerModel }) => {
+      resolve(summerizerModel);
+    });
+  });
+}
