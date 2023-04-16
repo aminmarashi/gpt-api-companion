@@ -1,10 +1,14 @@
-import { Message } from "./types";
+import { Message, Model } from "./types";
 
 class GPTApiClient {
-  constructor(private apiKey?: string, private apiUrl: string = "https://api.openai.com") { }
+  constructor(private apiKey?: string, private model: Model = Model.GPT3_5_TURBO, private apiUrl: string = "https://api.openai.com") { }
 
   setApiKey(apiKey: string) {
     this.apiKey = apiKey;
+  }
+
+  setModel(model: Model) {
+    this.model = model;
   }
 
   async post(path: string, data: any) {
@@ -34,7 +38,7 @@ class GPTApiClient {
           content: message[role as keyof Message],
         }
       }),
-      model: "gpt-3.5-turbo"
+      model: this.model
     });
 
     return response.choices[0].message.content;

@@ -13,3 +13,8 @@ export type Message = {
 } | {
   system: string
 }
+
+export enum Model {
+  GPT3_5_TURBO = 'gpt-3.5-turbo',
+  GPT4 = 'gpt-4',
+}

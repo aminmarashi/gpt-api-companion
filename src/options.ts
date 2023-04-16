@@ -2,6 +2,7 @@ import { renderMarkdown } from './markdown';
 import gptApiClient from './apiClient';
 import { Chat } from './Chat';
 import { getApiToken } from './utils';
+import { Model } from './types';
 
 document.addEventListener('DOMContentLoaded', () => {
   const optionsForm = document.getElementById('optionsForm') as HTMLFormElement;
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const userInput = document.getElementById('userInput') as HTMLTextAreaElement;
   const chatElement = document.getElementById('chat') as HTMLDivElement;
   const errorMessage = document.getElementById('errorMessage') as HTMLDivElement;
+  const modelSelect = document.getElementById('model') as HTMLSelectElement;
 
   const chat = new Chat(chatElement);
   chrome.storage.sync.get('apiToken', ({ apiToken }) => {
@@ -47,6 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (apiToken) {
         gptApiClient.setApiKey(apiToken);
+        if (modelSelect.value) {
+          const model = modelSelect.value === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO;
+          gptApiClient.setModel(model);
+        }
         try {
           const response = await gptApiClient.chat(chat.getMessages());
           await chat.appendMessage('assistant', response);
