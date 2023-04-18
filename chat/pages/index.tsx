@@ -1,8 +1,8 @@
 import 'highlight.js/styles/atom-one-dark.css'
 import { useEffect, useRef, useState } from 'react'
-import { Chat } from './common/Chat'
-import { Model } from './common/types'
-import gptApiClient from './common/apiClient'
+import { Chat } from '../common/Chat'
+import { Model } from '../common/types'
+import gptApiClient from '../common/apiClient'
 
 export default function Home() {
   const optionsFormRef = useRef<HTMLFormElement>(null)
