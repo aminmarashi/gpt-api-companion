@@ -68,6 +68,11 @@ function createSummaryWindow() {
   windowWrapper.id = '--gpt-api-companion-summary-window';
   windowWrapper.innerHTML = `
     <div id="draggable" style="position: fixed; top: 0; background-color: white; color: black; z-index: 10000; padding: 10px; border: 1px solid #ccc; box-sizing: border-box;">
+      <style>
+        .hidden {
+          display: none;
+        }
+      </style>
       <div id="header" style="cursor: move; display: flex; justify-content: space-between; align-items: center;">
         <h3>Summary</h3>
         <button id="--gpt-api-companion-window-close" style="border: none; background-color: transparent; cursor: pointer; font-size: 18px;">x</button>
