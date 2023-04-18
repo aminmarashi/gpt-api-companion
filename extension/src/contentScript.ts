@@ -1,6 +1,6 @@
-import { Chat } from "./Chat";
-import gptApiClient from "./apiClient";
-import { Model } from "./types";
+import { Chat } from "./common/Chat";
+import gptApiClient from "./common/apiClient";
+import { Model } from "./common/types";
 import { getApiToken, getSummerizerModel, safeGetSelectedText } from "./utils";
 
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {

@@ -9,6 +9,10 @@
     "sourceMap": true
   },
   "include": [
-    "src"
+    "src",
+    "src/common/Chat.ts",
+    "src/common/apiClient.ts",
+    "src/common/markdown.ts",
+    "src/common/types.ts"
   ]
 }

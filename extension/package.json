@@ -30,7 +30,6 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "gpt3-tokenizer": "^1.1.5",
     "highlight.js": "^11.7.0",
     "markdown-it": "^13.0.1",
     "punycode": "^2.3.0"

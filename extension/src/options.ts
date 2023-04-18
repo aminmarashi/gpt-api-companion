@@ -1,8 +1,8 @@
-import { renderMarkdown } from './markdown';
-import gptApiClient from './apiClient';
-import { Chat } from './Chat';
+import { renderMarkdown } from './common/markdown';
+import gptApiClient from './common/apiClient';
+import { Chat } from './common/Chat';
 import { getApiToken } from './utils';
-import { Model } from './types';
+import { Model } from './common/types';
 
 document.addEventListener('DOMContentLoaded', () => {
   const optionsForm = document.getElementById('optionsForm') as HTMLFormElement;
