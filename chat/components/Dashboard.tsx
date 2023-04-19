@@ -127,14 +127,14 @@ export default function Dashboard({
                               item.id === chatId
                                 ? 'bg-gray-800 text-white'
                                 : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                              'inline group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                              'inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                             )}
                           >
                             {item.messages[0][Object.keys(item.messages[0])[0]].slice(0, 30) + '...'}
                           </a>
                           <MinusIcon
                             onClick={() => onDelete(item.id)}
-                            className="inline h-6 w-6 text-white" aria-hidden="true" />
+                            className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
                         </div>
                       </li>
                     ))}

@@ -168,7 +168,7 @@ export default function Home() {
       </form>
       <hr className="my-5" />
       <h2 className="text-2xl text-gray-100 mb-5">Chat with GPT API Companion</h2>
-      <div className="w-full mr-4 bg-white shadow-md rounded p-4 text-gray-800">
+      <div className="w-full mr-4 bg-white shadow-md rounded p-2 text-gray-800">
         <div ref={chatElementRef} id="chat" className="overflow-y-scroll h-96">
           {/* Chat will be added here dynamically */}
         </div>
@@ -244,6 +244,7 @@ export default function Home() {
           </form>
         </div>
       </div>
+      <div className="hidden bg-gray-50 bg-gray-100"></div>
       <script type="module" src="../dist/options.js"></script>
     </Dashboard>
   )
