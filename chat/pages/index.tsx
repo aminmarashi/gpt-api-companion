@@ -34,6 +34,20 @@ export default function Home() {
     }
   }
 
+  const onHistoryDelete = (id: string) => {
+    fetch(`/api/history?user=${hash(localStorage.getItem('apiToken') || '')}&id=${id}`, {
+      method: 'DELETE',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          errorMessageRef.current!.innerText = data.error
+          return
+        }
+        setHistory(data)
+      })
+  }
+
   updateHistoryRef.current = (messages: Message[]) => {
     fetch('/api/history', {
       method: 'POST',
@@ -142,6 +156,7 @@ export default function Home() {
       history={history}
       chatId={chatId}
       onClick={onHistoryClick}
+      onDelete={onHistoryDelete}
     >
       <h2 className="text-2xl text-gray-100 mb-5">GPT API Companion - Options</h2>
       <form ref={optionsFormRef} id="optionsForm" className="flex">

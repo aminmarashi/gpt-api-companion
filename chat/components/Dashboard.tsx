@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import {
   Bars3Icon,
+  MinusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 
@@ -13,11 +14,13 @@ export default function Dashboard({
   history,
   chatId,
   onClick,
+  onDelete,
   children,
 }: {
   history: { id: string; messages: Message[] }[] | null
   chatId: string | null
   onClick: (id: string) => void
+  onDelete: (id: string) => void
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -78,17 +81,22 @@ export default function Dashboard({
                           <ul role="list" className="-mx-2 space-y-1">
                             {history.map((item) => (
                               <li key={item.id}>
-                                <a
-                                  onClick={() => onClick(item.id)}
-                                  className={classNames(
-                                    item.id === chatId
-                                      ? 'bg-gray-800 text-white'
-                                      : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                  )}
-                                >
-                                  {item.messages[0][Object.keys(item.messages[0])[0]]}
-                                </a>
+                                <div className='flex justify-between'>
+                                  <a
+                                    onClick={() => onClick(item.id)}
+                                    className={classNames(
+                                      item.id === chatId
+                                        ? 'bg-gray-800 text-white'
+                                        : 'text-gray-400 hover:text-white hover:bg-gray-800',
+                                      'inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                    )}
+                                  >
+                                    {item.messages[0][Object.keys(item.messages[0])[0]].slice(0, 35) + '...'}
+                                  </a>
+                                  <MinusIcon
+                                    onClick={() => onDelete(item.id)}
+                                    className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
+                                </div>
                               </li>
                             ))}
                           </ul>
@@ -112,17 +120,22 @@ export default function Dashboard({
                   <ul role="list" className="-mx-2 space-y-1">
                     {history.map((item) => (
                       <li key={item.id}>
-                        <a
-                          onClick={() => onClick(item.id)}
-                          className={classNames(
-                            item.id === chatId
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                          )}
-                        >
-                          {item.messages[0][Object.keys(item.messages[0])[0]]}
-                        </a>
+                        <div className='flex justify-between'>
+                          <a
+                            onClick={() => onClick(item.id)}
+                            className={classNames(
+                              item.id === chatId
+                                ? 'bg-gray-800 text-white'
+                                : 'text-gray-400 hover:text-white hover:bg-gray-800',
+                              'inline group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                            )}
+                          >
+                            {item.messages[0][Object.keys(item.messages[0])[0]].slice(0, 30) + '...'}
+                          </a>
+                          <MinusIcon
+                            onClick={() => onDelete(item.id)}
+                            className="inline h-6 w-6 text-white" aria-hidden="true" />
+                        </div>
                       </li>
                     ))}
                   </ul>
