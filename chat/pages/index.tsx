@@ -74,16 +74,16 @@ export default function Home() {
     <>
       <main className="bg-gray-700 min-h-screen">
         <div className="container mx-auto px-4 py-5">
-          <h2 className="text-2xl mb-5">GPT API Companion - Options</h2>
+          <h2 className="text-2xl text-gray-100 mb-5">GPT API Companion - Options</h2>
           <form ref={optionsFormRef} id="optionsForm" className="flex">
             <div>
-              <label htmlFor="apiToken" className="block text-sm mb-2">GPT API Token:</label>
+              <label htmlFor="apiToken" className="block text-sm text-gray-100G mb-2">GPT API Token:</label>
               <input type="password" ref={apiTokenRef} id="apiToken" name="apiToken" className="w-full rounded p-2 border-gray-300 text-gray-800" />
               <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-4">Save</button>
             </div>
           </form>
           <hr className="my-5" />
-          <h2 className="text-2xl mb-5">Chat with GPT API Companion</h2>
+          <h2 className="text-2xl text-gray-100 mb-5">Chat with GPT API Companion</h2>
           <div className="w-full mr-4 bg-white shadow-md rounded p-4 text-gray-800">
             <div ref={chatElementRef} id="chat" className="overflow-y-scroll h-96">
               {/* Chat will be added here dynamically */}
@@ -153,7 +153,7 @@ export default function Home() {
                 </button>
                 {/* a drop down to select the GPT model */}
                 <select ref={modelSelectRef} id="model"
-                  className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+                  className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow m-2">
                   <option value="gpt-3.5-turbo">GPT 3.5</option>
                   <option value="gpt-4">GPT 4</option>
                 </select>
