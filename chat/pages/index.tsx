@@ -21,10 +21,10 @@ export default function Home() {
   const spinnerRef = useRef<HTMLDivElement>(null)
 
   const [history, setHistory] = useState<{ id: string; messages: Message[] }[]>([])
-  const [chatId, setChatId] = useState<string>(null)
+  const [chatId, setChatId] = useState<string | null>(null)
   const [initialized, setInitialized] = useState<boolean>(false)
-  const updateHistoryRef = useRef<(messages: Message[]) => void>(null)
-  const chatRef = useRef<Chat>(null)
+  const updateHistoryRef = useRef<((messages: Message[]) => void) | null>(null)
+  const chatRef = useRef<Chat | null>(null)
 
   const onHistoryClick = (id: string) => {
     setChatId(id)

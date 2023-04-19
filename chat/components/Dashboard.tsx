@@ -5,6 +5,7 @@ import {
   MinusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
+import { Message, Role } from '@/common/types'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -91,7 +92,7 @@ export default function Dashboard({
                                       'inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                                     )}
                                   >
-                                    {item.messages[0][Object.keys(item.messages[0])[0]].slice(0, 35) + '...'}
+                                    {(item.messages[0] as any)[Object.keys(item.messages[0])[0]].slice(0, 35) + '...'}
                                   </a>
                                   <MinusIcon
                                     onClick={() => onDelete(item.id)}
@@ -130,7 +131,7 @@ export default function Dashboard({
                               'inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                             )}
                           >
-                            {item.messages[0][Object.keys(item.messages[0])[0]].slice(0, 30) + '...'}
+                            {(item.messages[0] as any)[Object.keys(item.messages[0])[0]].slice(0, 30) + '...'}
                           </a>
                           <MinusIcon
                             onClick={() => onDelete(item.id)}

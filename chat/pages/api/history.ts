@@ -54,7 +54,7 @@ async function getHandler(req: NextApiRequest, res: NextApiResponse<History | Er
   try {
     const history = await collection.find({ user }).toArray();
 
-    res.status(200).json(history.map(({ _id, ...rest }) => ({ id: _id, ...rest })))
+    res.status(200).json(history.map(({ _id, ...rest }) => ({ id: _id, ...rest })) as any)
   } catch (e) {
     console.error(e)
     res.status(400).json({ error: 'id not found' })
@@ -85,7 +85,7 @@ async function postHandler(req: NextApiRequest, res: NextApiResponse<History | E
 
     const history = await collection.find({ user }).toArray();
 
-    res.status(200).json(history.map(({ _id, ...rest }) => ({ id: _id, ...rest })))
+    res.status(200).json(history.map(({ _id, ...rest }) => ({ id: _id, ...rest })) as any)
   } catch (e) {
     console.error(e)
     res.status(500).json({ error: 'failed to write the history' })
@@ -115,7 +115,7 @@ async function deleteHandler(req: NextApiRequest, res: NextApiResponse<History |
 
     const history = await collection.find({ user }).toArray();
 
-    res.status(200).json(history.map(({ _id, ...rest }) => ({ id: _id, ...rest })))
+    res.status(200).json(history.map(({ _id, ...rest }) => ({ id: _id, ...rest })) as any)
   } catch (e) {
     console.error(e)
     res.status(400).json({ error: 'id not found' })

@@ -37,7 +37,7 @@ export class Chat {
     this.messages = [];
     for (const message of messages) {
       const [sender] = Object.keys(message) as Role[];
-      this.appendMessage(sender, message[sender], message.hide);
+      this.appendMessage(sender, (message as any)[sender] as string, message.hide);
     }
   }
 
