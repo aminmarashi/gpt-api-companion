@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const response = await gptApiClient.chat(chat.getMessages());
           await chat.appendMessage('assistant', response);
           spinner.classList.add('hidden');
+          errorMessage.classList.add('hidden')
         } catch (err) {
           console.error(err);
           errorMessage.innerText = 'Something went wrong. Please try again.';

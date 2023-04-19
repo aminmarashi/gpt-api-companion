@@ -32,7 +32,7 @@ class GPTApiClient {
   async chat(messages: Message[]): Promise<string> {
     const response = await this.post("/v1/chat/completions", {
       messages: messages.map((message) => {
-        const [role] = Object.keys(message);
+        const [role] = Object.keys(message).filter((key) => key !== 'hide');
         return {
           role,
           content: message[role as keyof Message],

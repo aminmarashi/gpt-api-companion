@@ -11,7 +11,8 @@ export class Chat {
 
   async appendMessage(sender: Role, message: string, hide = false) {
     this.messages.push({
-      [sender]: message
+      [sender]: message,
+      hide,
     } as Message);
     if (sender === 'system' || hide) {
       // We don't want the system message to be shown
@@ -27,6 +28,16 @@ export class Chat {
 
     // Scroll chat history to the bottom
     this.element.scrollTop = this.element.scrollHeight;
+  }
+
+  setMessages(messages: Message[]) {
+    while (this.element.firstChild) {
+      this.element.removeChild(this.element.firstChild);
+    }
+    for (const message of messages) {
+      const [sender] = Object.keys(message) as Role[];
+      this.appendMessage(sender, message[sender], message.hide);
+    }
   }
 
   getMessages(): Message[] {
