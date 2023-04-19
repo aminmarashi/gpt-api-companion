@@ -34,6 +34,7 @@ export class Chat {
     while (this.element.firstChild) {
       this.element.removeChild(this.element.firstChild);
     }
+    this.messages = [];
     for (const message of messages) {
       const [sender] = Object.keys(message) as Role[];
       this.appendMessage(sender, message[sender], message.hide);

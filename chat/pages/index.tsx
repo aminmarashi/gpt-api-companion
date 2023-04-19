@@ -23,6 +23,7 @@ export default function Home() {
   const [history, setHistory] = useState<{ id: string; messages: Message[] }[]>([])
   const [chatId, setChatId] = useState<string>(null)
   const [initialized, setInitialized] = useState<boolean>(false)
+  const updateHistoryRef = useRef<(messages: Message[]) => void>(null)
   const chatRef = useRef<Chat>(null)
 
   const onHistoryClick = (id: string) => {
@@ -33,9 +34,12 @@ export default function Home() {
     }
   }
 
-  const updateHistory = (messages: Message[], chatId: string) => {
+  updateHistoryRef.current = (messages: Message[]) => {
     fetch('/api/history', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         user: hash(localStorage.getItem('apiToken') || ''),
         id: chatId,
@@ -120,7 +124,7 @@ export default function Home() {
             await chat.appendMessage('assistant', response);
             spinnerRef.current?.classList.add('hidden');
             errorMessageRef.current!.classList.add('hidden')
-            updateHistory(chat.getMessages(), chatId);
+            updateHistoryRef.current!(chat.getMessages());
           } catch (err) {
             console.error(err);
             errorMessageRef.current!.innerText = 'Something went wrong. Please try again.';

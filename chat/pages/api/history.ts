@@ -61,7 +61,6 @@ async function get(req: NextApiRequest, res: NextApiResponse<History | Error>) {
 
 async function post(req: NextApiRequest, res: NextApiResponse<History | Error>) {
   const { user, id, messages } = req.body;
-  console.log('user', req.body)
   if (!user) {
     res.status(400).json({ error: 'Missing user' })
     return;
