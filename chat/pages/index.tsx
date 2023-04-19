@@ -77,7 +77,7 @@ export default function Home() {
           <h2 className="text-2xl text-gray-100 mb-5">GPT API Companion - Options</h2>
           <form ref={optionsFormRef} id="optionsForm" className="flex">
             <div>
-              <label htmlFor="apiToken" className="block text-sm text-gray-100G mb-2">GPT API Token:</label>
+              <label htmlFor="apiToken" className="block text-sm text-gray-100 mb-2">GPT API Token:</label>
               <input type="password" ref={apiTokenRef} id="apiToken" name="apiToken" className="w-full rounded p-2 border-gray-300 text-gray-800" />
               <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-4">Save</button>
             </div>
