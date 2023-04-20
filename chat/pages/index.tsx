@@ -121,7 +121,10 @@ export default function Home() {
       const message = userInputRef.current?.value.trim();
 
       if (message) {
-        await chat.appendMessage('user', message);
+        await chat.appendMessage({
+          sender: 'user',
+          message
+        });
         userInputRef.current!.value = '';
 
         const apiToken = localStorage.getItem('apiToken');
@@ -134,11 +137,14 @@ export default function Home() {
           }
           try {
             spinnerRef.current?.classList.remove('hidden');
-            const response = await gptApiClient.chat(chat.getMessages());
-            await chat.appendMessage('assistant', response);
+            const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()));
+            await chat.appendMessage({
+              sender: 'assistant',
+              message: response
+            });
             spinnerRef.current?.classList.add('hidden');
             errorMessageRef.current!.classList.add('hidden')
-            updateHistoryRef.current!(chat.getMessages());
+            updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
           } catch (err) {
             console.error(err);
             errorMessageRef.current!.innerText = 'Something went wrong. Please try again.';
