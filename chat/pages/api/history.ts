@@ -22,9 +22,11 @@ type Error = {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<History | Error>
+  res: NextApiResponse<History | Error | string>
 ) {
-  if (req.method === 'GET') {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).send('ok')
+  } else if (req.method === 'GET') {
     await getHandler(req, res);
   } else if (req.method === 'POST') {
     await postHandler(req, res);
