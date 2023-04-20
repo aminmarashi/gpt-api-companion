@@ -1,9 +1,12 @@
 import { renderMarkdown } from "./markdown";
 import { Message, Model, Role, RolesToPrompt } from "./types";
+import GPT3Tokenizer from 'gpt3-tokenizer';
+
+const tokenizer = new GPT3Tokenizer({ type: 'gpt3' }); // or 'codex'
 
 const limits = {
-  [Model.GPT3_5_TURBO]: 4096 * .6,
-  [Model.GPT4]: 8192 * .6
+  [Model.GPT3_5_TURBO]: 4096,
+  [Model.GPT4]: 8192
 }
 
 export class Chat {
@@ -64,8 +67,8 @@ export class Chat {
 
   getMessages(model: Model): Message[] {
     const limit = limits[model];
-    const words = countWordsInMessages(this.messages);
-    if (words > limit) {
+    const wordCount = countWordsInMessages(this.messages);
+    if (wordCount > limit) {
       const toTruncate = this.messages.filter(message => message.truncate);
       if (!toTruncate.length) {
         const hidden = this.messages.filter(message => message.hide);
@@ -89,14 +92,10 @@ export class Chat {
 
 }
 
-function countWords(str: string) {
-  return str.trim().split(/\s+/).length;
-}
-
 function countWordsInMessages(messages: Message[]) {
   return messages.reduce((acc, message) => {
     const [sender] = Object.keys(message) as Role[];
-    return acc + countWords((message as any)[sender] as string);
+    return acc + tokenizer.encode((message as any)[sender] as string).bpe.length;
   }, 0);
 }
 

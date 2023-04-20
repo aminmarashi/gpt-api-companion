@@ -2,6 +2,7 @@ import { Chat } from "./common/Chat";
 import gptApiClient from "./common/apiClient";
 import { Message, Model } from "./common/types";
 import { getApiToken, getsummarizerModel, safeGetSelectedText } from "./utils";
+import { convert } from 'html-to-text'
 
 async function hash(message: string) {
   // encode as UTF-8
@@ -61,7 +62,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
       try {
         let text = '';
         if (message.action === 'summarize-page') {
-          text = document.body.innerText;
+          text = convert(document.body.innerHTML);
         } else {
           text = safeGetSelectedText();
         }

@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.228",
+    "@types/html-to-text": "^9.0.0",
     "@types/markdown-it": "^12.2.3",
     "@types/node": "^18.15.12",
     "autoprefixer": "^10.4.14",
@@ -31,7 +32,9 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "gpt3-tokenizer": "^1.1.5",
     "highlight.js": "^11.7.0",
+    "html-to-text": "^9.0.5",
     "markdown-it": "^13.0.1",
     "punycode": "^2.3.0"
   }
