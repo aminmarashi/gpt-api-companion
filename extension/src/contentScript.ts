@@ -1,66 +1,129 @@
 import { Chat } from "./common/Chat";
 import gptApiClient from "./common/apiClient";
-import { Model } from "./common/types";
+import { Message, Model } from "./common/types";
 import { getApiToken, getSummerizerModel, safeGetSelectedText } from "./utils";
 
+async function hash(message: string) {
+  // encode as UTF-8
+  const msgBuffer = new TextEncoder().encode(message);
+
+  // hash the message
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+  // convert ArrayBuffer to Array
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  // convert bytes to hex string                  
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
-  let summary = document.getElementById('--gpt-api-companion-summary') as HTMLDivElement
-  if (!summary) {
-    createSummaryWindow();
-  }
-  const summaryWindow = document.getElementById('--gpt-api-companion-summary-window') as HTMLDivElement;
-  summaryWindow.classList.remove('hidden');
-  summary = document.getElementById('--gpt-api-companion-summary') as HTMLDivElement
+  const run = async () => {
+    let summary = document.getElementById('--gpt-api-companion-summary') as HTMLDivElement
+    if (!summary) {
+      createSummaryWindow();
+    }
+    const summaryWindow = document.getElementById('--gpt-api-companion-summary-window') as HTMLDivElement;
+    summaryWindow.classList.remove('hidden');
+    summary = document.getElementById('--gpt-api-companion-summary') as HTMLDivElement
 
-  const spinner = document.getElementById('--gpt-api-companion-spinner') as HTMLDivElement;
-  const apiToken = await getApiToken();
-  const summerizerModel = await getSummerizerModel();
-  const chat = new Chat(summary);
+    const spinner = document.getElementById('--gpt-api-companion-spinner') as HTMLDivElement;
+    const apiToken = await getApiToken();
+    const summerizerModel = await getSummerizerModel();
+    const chat = new Chat(summary);
+    let history: { id: string, messages: Message[] } | undefined = undefined;
 
-  if (apiToken) {
-    gptApiClient.setModel(summerizerModel === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO);
-    gptApiClient.setApiKey(apiToken);
-    try {
-      let text = '';
-      if (message.action === 'summerize-page') {
-        text = document.body.innerText;
-      } else {
-        text = safeGetSelectedText();
+    const updateHistory = async (messages: Message[]) => {
+      fetch('https://chat.lit.codes/api/history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user: await hash(apiToken),
+          id: history ? history.id : undefined,
+          messages,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            console.log(error)
+            return
+          }
+          history = data
+        })
+    };
+    if (apiToken) {
+      gptApiClient.setModel(summerizerModel === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO);
+      gptApiClient.setApiKey(apiToken);
+      try {
+        let text = '';
+        if (message.action === 'summerize-page') {
+          text = document.body.innerText;
+        } else {
+          text = safeGetSelectedText();
+        }
+        chat.appendMessage({
+          sender: 'system',
+          message: 'You are a summarizer bot that summerizes anything that comes next'
+        });
+        chat.appendMessage({
+          sender: 'user',
+          message: text,
+          hide: true
+        });
+        spinner.classList.remove('hidden');
+        const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()));
+        chat.appendMessage({
+          sender: 'assistant',
+          message: response
+        });
+        spinner.classList.add('hidden');
+        await updateHistory(chat.getMessages(gptApiClient.getModel()));
+      } catch (err) {
+        console.error(err);
       }
-      chat.appendMessage('system', 'You are a summarizer bot that summerizes anything that comes next');
-      chat.appendMessage('user', text, true);
-      spinner.classList.remove('hidden');
-      const response = await gptApiClient.chat(chat.getMessages());
-      chat.appendMessage('assistant', response);
-      spinner.classList.add('hidden');
-    } catch (err) {
-      console.error(err);
+    } else {
+      alert('Please set your GPT API Token in the extension settings.');
     }
-  } else {
-    alert('Please set your GPT API Token in the extension settings.');
+
+    // Attach question input event listener
+    const questionInput = document.getElementById('--gpt-api-companion-question') as HTMLInputElement;
+    const chatForm = document.getElementById('--gpt-api-companion-form') as HTMLFormElement;
+    chatForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const question = questionInput.value.trim();
+      if (question) {
+        chat.appendMessage({
+          sender: 'user',
+          message: question
+        });
+        questionInput.value = '';
+        spinner.classList.remove('hidden');
+        const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()));
+        chat.appendMessage({
+          sender: 'assistant',
+          message: response
+        });
+        spinner.classList.add('hidden');
+        await updateHistory(chat.getMessages(gptApiClient.getModel()));
+      }
+    });
+    questionInput?.addEventListener('keypress', async (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        chatForm.dispatchEvent(new Event('submit'));
+      }
+    });
   }
 
-  // Attach question input event listener
-  const questionInput = document.getElementById('--gpt-api-companion-question') as HTMLInputElement;
-  const chatForm = document.getElementById('--gpt-api-companion-form') as HTMLFormElement;
-  chatForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const question = questionInput.value.trim();
-    if (question) {
-      chat.appendMessage('user', question);
-      questionInput.value = '';
-      spinner.classList.remove('hidden');
-      const response = await gptApiClient.chat(chat.getMessages());
-      chat.appendMessage('assistant', response);
-      spinner.classList.add('hidden');
-    }
-  });
-  questionInput?.addEventListener('keypress', async (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      chatForm.dispatchEvent(new Event('submit'));
-    }
-  });
+  try {
+    await run()
+  } catch (e) {
+    console.error(e)
+  }
 });
 
 function createSummaryWindow() {

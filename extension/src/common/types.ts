@@ -8,10 +8,16 @@ export type Role = keyof typeof RolesToPrompt
 
 export type Message = {
   user: string
+  truncate: boolean
+  hide: boolean
 } | {
   assistant: string
+  truncate: boolean
+  hide: boolean
 } | {
   system: string
+  truncate: boolean
+  hide: boolean
 }
 
 export enum Model {

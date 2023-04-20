@@ -11,9 +11,13 @@ class GPTApiClient {
     this.model = model;
   }
 
+  getModel(): Model {
+    return this.model;
+  }
+
   async post(path: string, data: any) {
     if (!this.apiKey) {
-      throw new Error("Please set your GPT API Token in the extension settings.");
+      throw new Error("Please set your GPT API Token by clicking on the extension icon.");
     }
     const headers = {
       "Content-Type": "application/json",

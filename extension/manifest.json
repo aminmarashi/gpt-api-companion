@@ -6,7 +6,11 @@
   "permissions": [
     "activeTab",
     "storage",
+    "scripting",
     "contextMenus"
+  ],
+  "host_permissions": [
+    "https://chat.lit.codes/*"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';",
@@ -19,7 +23,6 @@
       "128": "public/robot-128.png"
     }
   },
-  "options_page": "public/options.html",
   "content_scripts": [
     {
       "matches": [

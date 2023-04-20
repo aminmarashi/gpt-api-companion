@@ -30,6 +30,37 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 
   chrome.action.onClicked.addListener((tab) => {
-    chrome.runtime.openOptionsPage();
+    chrome.tabs.create({ url: 'https://chat.lit.codes' });
   });
+
+  function saveToken() {
+    const apiToken = localStorage.getItem('apiToken');
+    const summerizerModel = localStorage.getItem('summerizerModel');
+    if (apiToken) {
+      chrome.storage.sync.set({ apiToken });
+    }
+    if (summerizerModel) {
+      chrome.storage.sync.set({ summerizerModel });
+    }
+  }
+
+  const apiToken = chrome.storage.sync.get('apiToken');
+  if (!apiToken) {
+    chrome.tabs.create({
+      active: true,
+      url: 'https://chat.lit.codes'
+    }, function (tab) {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: saveToken,
+      }, function () {
+        if (chrome.storage.sync.get('apiToken')) {
+          chrome.tabs.remove(tab.id);
+        } else {
+          alert('Please set your API Token in the extension options.')
+        }
+      });
+    });
+  }
+
 });
