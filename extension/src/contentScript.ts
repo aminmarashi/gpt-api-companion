@@ -67,13 +67,19 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
         }
         chat.appendMessage({
           sender: 'system',
-          message: 'You are a summarizer bot that summarizes anything that comes next'
+          message: 'You are a summarizer bot that summarizes anything that comes next',
+          hide: true
         });
         chat.appendMessage({
           sender: 'user',
           message: text,
+          truncate: true,
           hide: true
         });
+        chat.appendMessage({
+          sender: 'assistant',
+          message: `Summarizing ${document.title}...`,
+        })
         spinner.classList.remove('hidden');
         const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()));
         chat.appendMessage({

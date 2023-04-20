@@ -92,7 +92,7 @@ export default function Dashboard({
                                       'inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                                     )}
                                   >
-                                    {(item.messages[0] as any)[Object.keys(item.messages[0])[0]].slice(0, 35) + '...'}
+                                    {getTitle(item.messages, 30)}
                                   </a>
                                   <MinusIcon
                                     onClick={() => onDelete(item.id)}
@@ -131,7 +131,7 @@ export default function Dashboard({
                               'inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
                             )}
                           >
-                            {(item.messages[0] as any)[Object.keys(item.messages[0])[0]].slice(0, 30) + '...'}
+                            {getTitle(item.messages, 30)}
                           </a>
                           <MinusIcon
                             onClick={() => onDelete(item.id)}
@@ -162,4 +162,10 @@ export default function Dashboard({
       </div>
     </>
   )
+}
+
+function getTitle(messages: Message[], limit: number): string {
+  const titleMessage = messages.find((message) => !message.hide && !(message as any).system) || {}
+  const [sender] = Object.keys(titleMessage)
+  return (titleMessage as any)[sender].slice(0, limit)
 }
