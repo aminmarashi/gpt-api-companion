@@ -1,4 +1,4 @@
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
   // Add context menu item
   chrome.contextMenus.create({
     id: "summarize-text",
@@ -11,7 +11,15 @@ chrome.runtime.onInstalled.addListener(() => {
     contexts: ["all"],
   });
 
-  chrome.contextMenus.onClicked.addListener(function (info, tab) {
+  chrome.contextMenus.onClicked.addListener(async function (info, tab) {
+    const storage = await chrome.storage.sync.get('apiToken');
+    if (!storage.apiToken) {
+      getToken();
+    }
+    const updatedStorage = await chrome.storage.sync.get('apiToken');
+    if (!updatedStorage.apiToken) {
+      return;
+    }
     if (!tab || !tab.id) {
       alert('This extension only works on web pages.');
       return;
@@ -33,34 +41,37 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.tabs.create({ url: 'https://chat.lit.codes' });
   });
 
-  function saveToken() {
-    const apiToken = localStorage.getItem('apiToken');
-    const summarizerModel = localStorage.getItem('summarizerModel');
-    if (apiToken) {
-      chrome.storage.sync.set({ apiToken });
-    }
-    if (summarizerModel) {
-      chrome.storage.sync.set({ summarizerModel });
-    }
+  chrome.storage.sync.remove('apiToken');
+  const storage = await chrome.storage.sync.get('apiToken');
+  if (!storage.apiToken) {
+    getToken();
   }
-
-  const apiToken = chrome.storage.sync.get('apiToken');
-  if (!apiToken) {
-    chrome.tabs.create({
-      active: true,
-      url: 'https://chat.lit.codes'
-    }, function (tab) {
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: saveToken,
-      }, function () {
-        if (chrome.storage.sync.get('apiToken')) {
-          chrome.tabs.remove(tab.id);
-        } else {
-          alert('Please set your API Token in the extension options.')
-        }
-      });
-    });
-  }
-
 });
+
+function saveToken() {
+  const apiToken = localStorage.getItem('apiToken');
+  if (apiToken) {
+    chrome.storage.sync.set({ apiToken });
+  } else {
+    alert('Please set your API Token in the extension options.')
+  }
+}
+
+async function getToken() {
+  chrome.tabs.create({
+    active: true,
+    url: 'https://chat.lit.codes'
+  }, function (tab) {
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: saveToken,
+    }, async function () {
+      const storage = await chrome.storage.sync.get('apiToken');
+      if (storage.apiToken) {
+        chrome.tabs.remove(tab.id);
+      } else {
+        console.log('Please set your API Token in the extension options.')
+      }
+    });
+  });
+}

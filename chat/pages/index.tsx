@@ -110,6 +110,7 @@ export default function Home() {
       const apiToken = apiTokenRef.current?.value.trim();
       if (!apiToken) {
         alert('Please enter a valid GPT API Token.');
+        return;
       }
       localStorage.setItem('apiToken', apiToken || '')
 
