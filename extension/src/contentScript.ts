@@ -1,7 +1,7 @@
 import { Chat } from "./common/Chat";
 import gptApiClient from "./common/apiClient";
 import { Message, Model } from "./common/types";
-import { getApiToken, getSummerizerModel, safeGetSelectedText } from "./utils";
+import { getApiToken, getsummarizerModel, safeGetSelectedText } from "./utils";
 
 async function hash(message: string) {
   // encode as UTF-8
@@ -30,7 +30,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
 
     const spinner = document.getElementById('--gpt-api-companion-spinner') as HTMLDivElement;
     const apiToken = await getApiToken();
-    const summerizerModel = await getSummerizerModel();
+    const summarizerModel = await getsummarizerModel();
     const chat = new Chat(summary);
     let history: { id: string, messages: Message[] } | undefined = undefined;
 
@@ -56,18 +56,18 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
         })
     };
     if (apiToken) {
-      gptApiClient.setModel(summerizerModel === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO);
+      gptApiClient.setModel(summarizerModel === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO);
       gptApiClient.setApiKey(apiToken);
       try {
         let text = '';
-        if (message.action === 'summerize-page') {
+        if (message.action === 'summarize-page') {
           text = document.body.innerText;
         } else {
           text = safeGetSelectedText();
         }
         chat.appendMessage({
           sender: 'system',
-          message: 'You are a summarizer bot that summerizes anything that comes next'
+          message: 'You are a summarizer bot that summarizes anything that comes next'
         });
         chat.appendMessage({
           sender: 'user',

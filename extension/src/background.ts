@@ -19,12 +19,12 @@ chrome.runtime.onInstalled.addListener(() => {
     if (info.menuItemId === 'summarize-page') {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (!tabs || !tabs[0] || !tabs[0].id) return;
-        chrome.tabs.sendMessage(tabs[0].id, { action: "summerize-page" }, function (response) { });
+        chrome.tabs.sendMessage(tabs[0].id, { action: "summarize-page" }, function (response) { });
       });
     } else if (info.menuItemId === 'summarize-text') {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (!tabs || !tabs[0] || !tabs[0].id) return;
-        chrome.tabs.sendMessage(tabs[0].id, { action: "summerize-text" }, function (response) { });
+        chrome.tabs.sendMessage(tabs[0].id, { action: "summarize-text" }, function (response) { });
       });
     }
   });
@@ -35,12 +35,12 @@ chrome.runtime.onInstalled.addListener(() => {
 
   function saveToken() {
     const apiToken = localStorage.getItem('apiToken');
-    const summerizerModel = localStorage.getItem('summerizerModel');
+    const summarizerModel = localStorage.getItem('summarizerModel');
     if (apiToken) {
       chrome.storage.sync.set({ apiToken });
     }
-    if (summerizerModel) {
-      chrome.storage.sync.set({ summerizerModel });
+    if (summarizerModel) {
+      chrome.storage.sync.set({ summarizerModel });
     }
   }
 
