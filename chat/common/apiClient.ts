@@ -11,9 +11,13 @@ class GPTApiClient {
     this.model = model;
   }
 
+  getModel(): Model {
+    return this.model;
+  }
+
   async post(path: string, data: any) {
     if (!this.apiKey) {
-      throw new Error("Please set your GPT API Token in the extension settings.");
+      throw new Error("Please set your GPT API Token by clicking on the extension icon.");
     }
     const headers = {
       "Content-Type": "application/json",
@@ -32,7 +36,7 @@ class GPTApiClient {
   async chat(messages: Message[]): Promise<string> {
     const response = await this.post("/v1/chat/completions", {
       messages: messages.map((message) => {
-        const [role] = Object.keys(message).filter((key) => key !== 'hide');
+        const [role] = Object.keys(message);
         return {
           role,
           content: message[role as keyof Message],

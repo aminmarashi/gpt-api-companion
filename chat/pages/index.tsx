@@ -165,6 +165,9 @@ export default function Home() {
           <input type="password" ref={apiTokenRef} id="apiToken" name="apiToken" className="w-full rounded p-2 border-gray-300 text-gray-800" />
           <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-4">Save</button>
         </div>
+        <div className="ml-8 text-gray-100">
+          Install the <a target='_blank' className="text-gray-400" href="https://chrome.google.com/webstore/detail/gpt-api-companion/bdaanmhmamgpeppfdajedeliilghopol">Chrome Extension</a>
+        </div>
       </form>
       <hr className="my-5" />
       <h2 className="text-2xl text-gray-100 mb-5">Chat with GPT API Companion</h2>
