@@ -80,7 +80,7 @@ export default function Dashboard({
                       <ul role="list" className="flex flex-1 flex-col gap-y-7">
                         <li>
                           <ul role="list" className="-mx-2 space-y-1">
-                            {history.map((item) => (
+                            {history.slice().reverse().map((item) => (
                               <li key={item.id}>
                                 <div className='flex justify-between'>
                                   <a
@@ -119,7 +119,7 @@ export default function Dashboard({
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
                   <ul role="list" className="-mx-2 space-y-1">
-                    {history.map((item) => (
+                    {history.slice().reverse().map((item) => (
                       <li key={item.id}>
                         <div className='flex justify-between'>
                           <a
