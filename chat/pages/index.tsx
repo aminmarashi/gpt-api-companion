@@ -66,6 +66,7 @@ export default function Home() {
           errorMessageRef.current!.innerText = data.error
           return
         }
+        setChatId(data.slice(-1)[0].id)
         setHistory(data)
       })
   }
@@ -82,6 +83,12 @@ export default function Home() {
         }
         setHistory(data)
       })
+  }
+
+  const createNewChat = () => {
+    setChatId(null)
+    userInputRef.current!.value = ''
+    chatRef.current?.resetMessages()
   }
 
   useEffect(() => {
@@ -164,6 +171,7 @@ export default function Home() {
       chatId={chatId}
       onClick={onHistoryClick}
       onDelete={onHistoryDelete}
+      onNewChatClick={createNewChat}
     >
       <h2 className="text-2xl text-gray-100 mb-5">GPT API Companion - Options</h2>
       <form ref={optionsFormRef} id="optionsForm" className="flex">

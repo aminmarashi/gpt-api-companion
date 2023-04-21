@@ -3,6 +3,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import {
   Bars3Icon,
   MinusIcon,
+  PlusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { Message, Role } from '@/common/types'
@@ -16,12 +17,14 @@ export default function Dashboard({
   chatId,
   onClick,
   onDelete,
+  onNewChatClick,
   children,
 }: {
   history: { id: string; messages: Message[] }[] | null
   chatId: string | null
   onClick: (id: string) => void
   onDelete: (id: string) => void
+  onNewChatClick: () => void
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -80,6 +83,9 @@ export default function Dashboard({
                       <ul role="list" className="flex flex-1 flex-col gap-y-7">
                         <li>
                           <ul role="list" className="-mx-2 space-y-1">
+                            <li onClick={onNewChatClick} className="flex justify-center">
+                              <NewChatButton onClick={onNewChatClick} />
+                            </li>
                             {history.slice().reverse().map((item) => (
                               <li key={item.id}>
                                 <div className='flex justify-between'>
@@ -94,9 +100,7 @@ export default function Dashboard({
                                   >
                                     {getTitle(item.messages, 30)}
                                   </a>
-                                  <MinusIcon
-                                    onClick={() => onDelete(item.id)}
-                                    className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
+                                  <DeleteIcon onClick={() => onDelete(item.id)} />
                                 </div>
                               </li>
                             ))}
@@ -119,6 +123,9 @@ export default function Dashboard({
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
                   <ul role="list" className="-mx-2 space-y-1">
+                    <li className="flex justify-center">
+                      <NewChatButton onClick={onNewChatClick} />
+                    </li>
                     {history.slice().reverse().map((item) => (
                       <li key={item.id}>
                         <div className='flex justify-between'>
@@ -133,9 +140,7 @@ export default function Dashboard({
                           >
                             {getTitle(item.messages, 30)}
                           </a>
-                          <MinusIcon
-                            onClick={() => onDelete(item.id)}
-                            className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
+                          <DeleteIcon onClick={() => onDelete(item.id)} />
                         </div>
                       </li>
                     ))}
@@ -161,6 +166,21 @@ export default function Dashboard({
         </main>
       </div>
     </>
+  )
+}
+
+function DeleteIcon({ onClick }: { onClick: () => void }): JSX.Element {
+  return <button onClick={onClick}>
+    <MinusIcon
+      className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
+  </button>
+}
+
+function NewChatButton({ onClick }: { onClick: () => void }): JSX.Element {
+  return (
+    <button onClick={onClick} className="flex items-end">
+      <span className="text-gray-100 pt-4">New chat</span><PlusIcon className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
+    </button>
   )
 }
 

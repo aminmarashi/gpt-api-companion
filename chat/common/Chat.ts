@@ -50,9 +50,7 @@ export class Chat {
   }
 
   setMessages(messages: Message[]) {
-    while (this.element.firstChild) {
-      this.element.removeChild(this.element.firstChild);
-    }
+    this.element.innerHTML = '';
     this.messages = [];
     for (const message of messages) {
       const [sender] = Object.keys(message) as Role[];
@@ -63,6 +61,11 @@ export class Chat {
         truncate: message.truncate
       });
     }
+  }
+
+  resetMessages() {
+    this.setMessages([]);
+    this.element.innerHTML = '';
   }
 
   getMessages(model: Model): Message[] {
