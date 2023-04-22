@@ -154,7 +154,7 @@ async fetchPageAsMarkdown(url) -> scrapes the contents of the given url asynchro
 
 async askChatbotToPerformPromptOnContent(offlineQueryFromChatbot, markdownContent) -> sends offlineQueryFromChatbot followed by the markdownContent to a chatbot that's as capable as GPT-4, but is not connected to the web, so the source to get the data shouldn't be specified in offlineQueryFromChatbot
 
-Generate the suitable code for the following prompt. The code should be a composition of the two functions above. Even though it's in JavaScript, no other syntax can be used, only the functions above. Do not use variables, do not define new functions, do not import any libraries, do not use any other syntax. Only use the two functions above. Remove any reference to a website name from the string passed to offlineQueryFromChatbot.
+Generate the suitable code for the following prompt. The code should be a composition of the two functions above. Remove any reference to a website name from the string passed to offlineQueryFromChatbot.
 
 Hint: The chatbot is capable of extracting any information from the markdownContent, it's just not capable of accessing web, and for that it uses the help from fetchPageAsMarkdown.
 
@@ -214,7 +214,7 @@ Hint: The resulting code is the logic wrapped inside of an async function called
                 console.error(e)
                 await chat.appendMessage({
                   sender: 'assistant',
-                  message: 'I am sorry but I am not able to solve this task. Please try again or a different one.'
+                  message: 'I am sorry but I am not able to solve this task. Please try again.'
                 });
                 spinnerRef.current?.classList.add('hidden');
                 errorMessageRef.current!.classList.add('hidden')
@@ -265,7 +265,7 @@ Hint: The resulting code is the logic wrapped inside of an async function called
           <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-4">Save</button>
         </div>
         <div className="ml-8 text-gray-100">
-          Install the <a target='_blank' className="text-gray-400" href="https://chrome.google.com/webstore/detail/gpt-api-companion/bdaanmhmamgpeppfdajedeliilghopol">Chrome Extension</a>
+          Install the <a target='_blank' className="text-gray-400 hover:text-gray-500" href="https://chrome.google.com/webstore/detail/gpt-api-companion/bdaanmhmamgpeppfdajedeliilghopol">Chrome Extension</a>
         </div>
       </form>
       <hr className="my-5" />
