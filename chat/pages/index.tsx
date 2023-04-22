@@ -126,15 +126,9 @@ export default function Home() {
 
     chatFormRef.current?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const message = userInputRef.current?.value.trim();
+      let message = userInputRef.current?.value.trim();
 
       if (message) {
-        await chat.appendMessage({
-          sender: 'user',
-          message
-        });
-        userInputRef.current!.value = '';
-
         const apiToken = localStorage.getItem('apiToken');
 
         if (apiToken) {
@@ -145,6 +139,93 @@ export default function Home() {
           }
           try {
             spinnerRef.current?.classList.remove('hidden');
+            if (message.includes('/sudo')) {
+              await chat.addMessageToChatElement('user', message);
+              userInputRef.current!.value = '';
+              let prompt = await gptApiClient.chat([
+                {
+                  system: `
+I have made two functions that are already available in the global scope:
+
+async fetchPageAsMarkdown(url) -> scrapes the contents of the given url asynchronously and returns the relevant content "magically" if used with "await". The return value is a string containing the result of scraping the page and contains useful content that can be passed to askChatbotToPerformPromptOnContent. This function is capable of performing web scraping and data manipulation
+
+async askChatbotToPerformPromptOnContent(offlineQueryFromChatbot, markdownContent) -> sends offlineQueryFromChatbot followed by the markdownContent to a chatbot that's as capable as GPT-4, but is not connected to the web, so the source to get the data shouldn't be specified in offlineQueryFromChatbot
+
+Generate the suitable code for the following prompt. The code should be a composition of the two functions above. Even though it's in JavaScript, no other syntax can be used, only the functions above. Do not use variables, do not define new functions, do not import any libraries, do not use any other syntax. Only use the two functions above. Remove any reference to a website name from the string passed to offlineQueryFromChatbot.
+
+Hint: The chatbot is capable of extracting any information from the markdownContent, it's just not capable of accessing web, and for that it uses the help from fetchPageAsMarkdown.
+
+Hint: The resulting code is the logic wrapped inside of an async function called executeChatbotLogic. The function should return the answer to the prompt. Do not add anything after the async function definition. DO NOT CALL THE executeChatbotLogic function (don't add 'executeChatbotLogic();' to the code). Do not use IIFE either.
+`,
+                  truncate: false,
+                  hide: true
+                },
+                {
+                  user: message.replace(/\/sudo/g, ''),
+                  truncate: false,
+                  hide: true
+                }
+              ])
+              let response;
+              try {
+                // @ts-ignore
+                async function fetchPageAsMarkdown(url: string) {
+                  return await fetch('/api/fetcher', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      url,
+                      user: hash(localStorage.getItem('apiToken') || ''),
+                    })
+                  }).then(res => res.text())
+                }
+
+                // @ts-ignore
+                async function askChatbotToPerformPromptOnContent(offlineQueryFromChatbot: string, markdownContent: string) {
+                  if (!markdownContent.trim()) {
+                    throw new Error('No content')
+                  }
+                  return `The following content is downloaded from the website mentioned in the prompt in markdown format, use it to generate an answer to this prompt: '${offlineQueryFromChatbot}'. The content (do not complain if the content is not complete):
+                  
+                  ${markdownContent}, `
+                }
+
+                if (prompt.includes('```')) {
+                  prompt = prompt.split('```')[1]
+                }
+                const fn = (() => eval(`(
+                  ${prompt}
+                )`))();
+                message = await fn();
+                if (!message) {
+                  throw new Error('No message')
+                }
+                await chat.appendMessage({
+                  sender: 'user',
+                  hide: true,
+                  message
+                });
+              } catch (e) {
+                console.error(e)
+                await chat.appendMessage({
+                  sender: 'assistant',
+                  message: 'I am sorry but I am not able to solve this task. Please try again or a different one.'
+                });
+                spinnerRef.current?.classList.add('hidden');
+                errorMessageRef.current!.classList.add('hidden')
+                updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
+                return;
+              }
+            } else {
+              await chat.appendMessage({
+                sender: 'user',
+                message
+              });
+              userInputRef.current!.value = '';
+            }
+
             const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()));
             await chat.appendMessage({
               sender: 'assistant',
