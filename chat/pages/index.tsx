@@ -140,7 +140,10 @@ export default function Home() {
           try {
             spinnerRef.current?.classList.remove('hidden');
             if (message.includes('/sudo')) {
-              await chat.addMessageToChatElement('user', message);
+              await chat.appendMessage({
+                sender: 'user',
+                message
+              });
               userInputRef.current!.value = '';
               let prompt = await gptApiClient.chat([
                 {
