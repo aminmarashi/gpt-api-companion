@@ -145,76 +145,84 @@ export default function Home() {
                 message
               });
               userInputRef.current!.value = '';
-              let prompt = await gptApiClient.chat([
-                {
-                  system: `
-I have made two functions that are already available in the global scope:
+              let retriesLeft = 5;
+              while (retriesLeft-- > 0) {
+                let prompt = await gptApiClient.chat([
+                  {
+                    system: `
+  I have made two functions that are already available in the global scope:
 
-async fetchPageAsMarkdown(url) -> scrapes the contents of the given url asynchronously and returns the relevant content "magically" if used with "await". The return value is a string containing the result of scraping the page and contains useful content that can be passed to askChatbotToPerformPromptOnContent. This function is capable of performing web scraping and data manipulation
+  async fetchPageAsMarkdown(url) -> scrapes the contents of the given url asynchronously and returns the relevant content "magically" if used with "await". The return value is a string containing the result of scraping the page and contains useful content that can be passed to askChatbotToPerformPromptOnContent. This function is capable of performing web scraping and data manipulation
 
-async askChatbotToPerformPromptOnContent(offlineQueryFromChatbot, markdownContent) -> sends offlineQueryFromChatbot followed by the markdownContent to a chatbot that's as capable as GPT-4, but is not connected to the web, so the source to get the data shouldn't be specified in offlineQueryFromChatbot
+  async askChatbotToPerformPromptOnContent(offlineQueryFromChatbot, markdownContent) -> sends offlineQueryFromChatbot followed by the markdownContent to a chatbot that's as capable as GPT-4, but is not connected to the web, so the source to get the data shouldn't be specified in offlineQueryFromChatbot
 
-Generate the suitable code for the following prompt. The code should be a composition of the two functions above. Remove any reference to a website name from the string passed to offlineQueryFromChatbot.
+  Generate the suitable code for the following prompt. The code should be a composition of the two functions above. Remove any reference to a website name from the string passed to offlineQueryFromChatbot.
 
-Hint: The chatbot is capable of extracting any information from the markdownContent, it's just not capable of accessing web, and for that it uses the help from fetchPageAsMarkdown.
+  Hint: The chatbot is capable of extracting any information from the markdownContent, it's just not capable of accessing web, and for that it uses the help from fetchPageAsMarkdown.
 
-Hint: The resulting code is the logic wrapped inside of an async function called executeChatbotLogic. The function should return the answer to the prompt. Do not add anything after the async function definition. DO NOT CALL THE executeChatbotLogic function (don't add 'executeChatbotLogic();' to the code). Do not use IIFE either.
-`,
-                  truncate: false,
-                  hide: true
-                },
-                {
-                  user: message.replace(/\/sudo/g, ''),
-                  truncate: false,
-                  hide: true
-                }
-              ])
-              let response;
-              try {
-                // @ts-ignore
-                async function fetchPageAsMarkdown(url: string) {
-                  return await fetch('/api/fetcher', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      url,
-                      user: hash(localStorage.getItem('apiToken') || ''),
-                    })
-                  }).then(res => res.text())
-                }
-
-                // @ts-ignore
-                async function askChatbotToPerformPromptOnContent(offlineQueryFromChatbot: string, markdownContent: string) {
-                  if (!markdownContent.trim()) {
-                    throw new Error('No content')
+  Hint: The resulting code is the logic wrapped inside of an async function called executeChatbotLogic. The function should return the answer to the prompt. Do not add anything after the async function definition. DO NOT CALL THE executeChatbotLogic function (don't add 'executeChatbotLogic();' to the code). Do not use IIFE either.
+  `,
+                    truncate: false,
+                    hide: true
+                  },
+                  {
+                    user: message.replace(/\/sudo/g, ''),
+                    truncate: false,
+                    hide: true
                   }
-                  return `The following content is downloaded from the website mentioned in the prompt in markdown format, use it to generate an answer to this prompt: '${offlineQueryFromChatbot}'. The content (do not complain if the content is not complete):
-                  
-                  ${markdownContent}, `
-                }
+                ])
+                let response;
+                try {
+                  // @ts-ignore
+                  async function fetchPageAsMarkdown(url: string) {
+                    return await fetch('/api/fetcher', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        url,
+                        user: hash(localStorage.getItem('apiToken') || ''),
+                      })
+                    }).then(res => res.text())
+                  }
 
-                if (prompt.includes('```')) {
-                  prompt = prompt.split('```')[1]
+                  // @ts-ignore
+                  async function askChatbotToPerformPromptOnContent(offlineQueryFromChatbot: string, markdownContent: string) {
+                    if (!markdownContent.trim()) {
+                      throw new Error('No content')
+                    }
+                    return `The following content is downloaded from the website mentioned in the prompt in markdown format, use it to generate an answer to this prompt: '${offlineQueryFromChatbot}'. The content (do not complain if the content is not complete):
+                    
+                    ${markdownContent}, `
+                  }
+
+                  if (prompt.includes('```')) {
+                    prompt = prompt.split('```')[1]
+                  }
+                  const fn = (() => eval(`(
+                    ${prompt}
+                  )`))();
+                  message = await fn();
+                  if (!message) {
+                    throw new Error('No message')
+                  }
+                  await chat.appendMessage({
+                    sender: 'user',
+                    hide: true,
+                    message
+                  });
+                  break;
+                } catch (e) {
+                  console.error(e)
+                  console.log(`Retrying... ${retriesLeft} retries left`)
+                  continue;
                 }
-                const fn = (() => eval(`(
-                  ${prompt}
-                )`))();
-                message = await fn();
-                if (!message) {
-                  throw new Error('No message')
-                }
-                await chat.appendMessage({
-                  sender: 'user',
-                  hide: true,
-                  message
-                });
-              } catch (e) {
-                console.error(e)
+              }
+              if (retriesLeft <= 0) {
                 await chat.appendMessage({
                   sender: 'assistant',
-                  message: 'I am sorry but I am not able to solve this task. Please try again.'
+                  message: 'I am sorry but I am not able to solve this task. Please use a different prompt.'
                 });
                 spinnerRef.current?.classList.add('hidden');
                 errorMessageRef.current!.classList.add('hidden')
@@ -291,42 +299,42 @@ Hint: The resulting code is the logic wrapped inside of an async function called
                     {
 
                       `.spinner_jCIR {
-                        animation: spinner_B8Vq .9s linear infinite;
-                      animation-delay: -.9s
+                    animation: spinner_B8Vq .9s linear infinite;
+                    animation- delay: -.9s
                   }
 
                       .spinner_upm8 {
-                        animation - delay: -.8s
-                  }
+                  animation - delay: -.8s
+                }
 
                       .spinner_2eL5 {
-                        animation - delay: -.7s
-                  }
+                  animation - delay: -.7s
+                }
 
                       .spinner_Rp9l {
-                        animation - delay: -.6s
-                  }
+                  animation - delay: -.6s
+                }
 
                       .spinner_dy3W {
-                        animation - delay: -.5s
-                  }
+                  animation - delay: -.5s
+                }
 
-                      @keyframes spinner_B8Vq {
+                @keyframes spinner_B8Vq {
 
-                        0 %,
-                        66.66 % {
-                          animation- timing - function: cubic- bezier(0.36, .61, .3, .98);
-                      y: 6px;
-                      height: 12px
-                    }
+                  0 %,
+                    66.66 % {
+                      animation- timing - function: cubic- bezier(0.36, .61, .3, .98);
+                  y: 6px;
+                  height: 12px
+                }
 
-                      33.33% {
-                        animation - timing - function: cubic- bezier(0.36, .61, .3, .98);
-                      y: 1px;
-                      height: 22px
-                    }
-                  }
-                  `}
+                33.33 % {
+                  animation - timing - function: cubic- bezier(0.36, .61, .3, .98);
+                y: 1px;
+                height: 22px
+              }
+            }
+            `}
                   </style>
                   <rect className="spinner_jCIR" x="1" y="6" fill="white" width="2.8" height="12" />
                   <rect className="spinner_jCIR spinner_upm8" fill="white" x="5.8" y="6" width="2.8" height="12" />
