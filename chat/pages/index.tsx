@@ -140,6 +140,7 @@ export default function Home() {
           try {
             spinnerRef.current?.classList.remove('hidden');
             if (message.includes('/sudo')) {
+              const existingMessages = chat.getMessages(gptApiClient.getModel());
               await chat.appendMessage({
                 sender: 'user',
                 message
@@ -148,6 +149,7 @@ export default function Home() {
               let retriesLeft = modelSelectRef.current!.value === 'gpt-4' ? 2 : 5;
               while (retriesLeft-- > 0) {
                 let prompt = await gptApiClient.chat([
+                  ...existingMessages,
                   {
                     system: `
   I have made two functions that are already available in the global scope:
@@ -166,7 +168,7 @@ export default function Home() {
                     hide: true
                   },
                   {
-                    user: message.replace(/\/sudo/g, ''),
+                    user: message!.replace(/\/sudo/g, ''),
                     truncate: false,
                     hide: true
                   }

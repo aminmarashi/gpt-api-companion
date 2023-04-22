@@ -28,6 +28,12 @@ export default async function handler(
       console.error(e)
       res.status(403).send('You are not allowed to do this.')
     }
+    try {
+      new URL(url)
+    } catch {
+      res.status(400).send('Invalid URL')
+      return;
+    }
     const response = await fetch(url, {
       method: 'GET',
       headers: {
