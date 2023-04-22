@@ -28,7 +28,14 @@ export default async function handler(
       console.error(e)
       res.status(403).send('You are not allowed to do this.')
     }
-    const response = await fetch(url).then((res) => res.text());
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Chrome/85.0.4178.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'Accept-Language': 'en-US,en;q=0.9',
+      }
+    }).then((res) => res.text());
     res.status(200).send(
       NodeHtmlMarkdown.translate(response)
     )
