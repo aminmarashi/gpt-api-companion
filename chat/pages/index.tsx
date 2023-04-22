@@ -145,7 +145,7 @@ export default function Home() {
                 message
               });
               userInputRef.current!.value = '';
-              let retriesLeft = 5;
+              let retriesLeft = modelSelectRef.current!.value === 'gpt-4' ? 2 : 5;
               while (retriesLeft-- > 0) {
                 let prompt = await gptApiClient.chat([
                   {
