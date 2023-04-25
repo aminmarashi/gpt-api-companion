@@ -3,20 +3,57 @@ import gptApiClient from "./common/apiClient";
 import { Message, Model } from "./common/types";
 import { getApiToken, getsummarizerModel, safeGetSelectedText } from "./utils";
 import { convert } from 'html-to-text'
+import { AES, SHA256, enc } from 'crypto-js'
 
-async function hash(message: string) {
-  // encode as UTF-8
-  const msgBuffer = new TextEncoder().encode(message);
+type History = { id: string, messages: Message[] }
 
-  // hash the message
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+function hash(str: string) {
+  return SHA256(str).toString()
+}
 
-  // convert ArrayBuffer to Array
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
+function encryptMessage(message: string, apiKey: string) {
+  return AES.encrypt(message, apiKey).toString()
+}
 
-  // convert bytes to hex string                  
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
+function decryptMessage(encryptedMessage: string, apiKey: string) {
+  return AES.decrypt(encryptedMessage, apiKey).toString(enc.Utf8)
+}
+
+function encryptMessages(messages: Message[], key: string) {
+  return messages.map((message) => {
+    const [sender] = Object.keys(message)
+    const encryptedMessage = encryptMessage((message as any)[sender], key)
+    return {
+      ...message,
+      [sender]: encryptedMessage,
+      encrypted: true,
+    }
+  })
+}
+
+function decryptHistory(historyList: History[], key: string) {
+  return historyList.map((history) => {
+    const decryptedMessages = decryptMessages(history.messages, key)
+    return {
+      ...history,
+      messages: decryptedMessages
+    }
+  })
+}
+
+function decryptMessages(messages: Message[], key: string) {
+  return messages.map((message) => {
+    if (!message.encrypted) {
+      return message
+    }
+    const [sender] = Object.keys(message)
+    const decryptedMessage = decryptMessage((message as any)[sender], key)
+    return {
+      ...message,
+      [sender]: decryptedMessage,
+      encrypted: false
+    }
+  })
 }
 
 chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
@@ -33,7 +70,7 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
     const apiToken = await getApiToken();
     const summarizerModel = await getsummarizerModel();
     const chat = new Chat(summary);
-    let history: { id: string, messages: Message[] } | undefined = undefined;
+    let history: History | undefined = undefined;
 
     const updateHistory = async (messages: Message[]) => {
       fetch('https://chat.lit.codes/api/history', {
@@ -42,18 +79,18 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user: await hash(apiToken),
+          user: hash(apiToken),
           id: history ? history.id : undefined,
-          messages,
+          messages: encryptMessages(messages, apiToken)
         }),
       })
         .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            console.log(error)
+        .then((data: History[] | { error: string }) => {
+          if ('error' in data) {
+            console.log(data.error)
             return
           }
-          history = data
+          history = decryptHistory(data, apiToken).slice(-1)[0]
         })
     };
     if (apiToken) {

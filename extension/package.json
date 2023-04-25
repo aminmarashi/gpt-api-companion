@@ -1,6 +1,6 @@
 {
   "name": "gpt-api-companion",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Tools built around the GPT API to make using of it easier, sets you free from ChatGPT (requires GPT API Key)",
   "main": "dist/index.js",
   "repository": "git@github.com:aminmarashi/gpt-api-companion.git",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.228",
+    "@types/crypto-js": "^4.1.1",
     "@types/html-to-text": "^9.0.0",
     "@types/markdown-it": "^12.2.3",
     "@types/node": "^18.15.12",
@@ -32,6 +33,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "crypto-js": "^4.1.1",
     "gpt3-tokenizer": "^1.1.5",
     "highlight.js": "^11.7.0",
     "html-to-text": "^9.0.5",
