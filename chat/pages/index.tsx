@@ -30,6 +30,16 @@ function encryptMessages(messages: Message[], key: string) {
   })
 }
 
+function encryptHistory(historyList: History[], key: string) {
+  return historyList.map((history) => {
+    const encryptedMessages = encryptMessages(history.messages, key)
+    return {
+      ...history,
+      messages: encryptedMessages
+    }
+  })
+}
+
 function decryptHistory(historyList: History[], key: string) {
   return historyList.map((history) => {
     const decryptedMessages = decryptMessages(history.messages, key)
@@ -85,7 +95,8 @@ export default function Home() {
   }
 
   const onHistoryDelete = (id: string) => {
-    fetch(`/api/history?user=${hash(localStorage.getItem('apiToken') || '')}&id=${id}`, {
+    const apiToken = localStorage.getItem('apiToken') || ''
+    fetch(`/api/history?user=${hash(apiToken)}&id=${id}`, {
       method: 'DELETE',
     })
       .then((res) => res.json())
@@ -94,7 +105,7 @@ export default function Home() {
           errorMessageRef.current!.innerText = data.error
           return
         }
-        setHistory(data)
+        setHistory(decryptHistory(data, apiToken))
       })
   }
 
@@ -129,6 +140,29 @@ export default function Home() {
     if ('error' in data) {
       errorMessageRef.current!.innerText = data.error
       return
+    }
+    // TODO: Remove once all chat history is encrypted
+    for (const history of data) {
+      const messages = history.messages
+      const chatId = history.id
+      if (!messages.find((m) => m.encrypted)) {
+        try {
+          await fetch('/api/history', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user: hash(apiToken),
+              id: chatId,
+              messages: encryptMessages(messages, apiToken)
+            }),
+          })
+        } catch (e) {
+          console.error(e)
+          errorMessageRef.current!.innerText = 'Unable to encrypt messages in history, please manually open and modify a chat history to encrypt it.'
+        }
+      }
     }
     setHistory(decryptHistory(data, apiToken))
   }
