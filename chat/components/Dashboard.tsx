@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import {
   Bars3Icon,
+  LockClosedIcon,
   MinusIcon,
   PlusIcon,
   XMarkIcon,
@@ -106,6 +107,15 @@ export default function Dashboard({
                             ))}
                           </ul>
                         </li>
+                        <li className="mt-auto">
+                          <a
+                            href="/privacy-and-security"
+                            className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                          >
+                            <LockClosedIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                            Privacy and security
+                          </a>
+                        </li>
                       </ul>
                     </nav>
                   </div>
@@ -145,6 +155,15 @@ export default function Dashboard({
                       </li>
                     ))}
                   </ul>
+                </li>
+                <li className="mt-auto">
+                  <a
+                    href="/privacy-and-security"
+                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
+                  >
+                    <LockClosedIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
+                    Privacy and security
+                  </a>
                 </li>
               </ul>
             </nav>
