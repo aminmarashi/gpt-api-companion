@@ -152,7 +152,7 @@ export default function Home() {
               sudoChat.appendMessage({
                 sender: 'system',
                 message: `
-  I have made two functions that are already available in the global scope:
+  I have made two functions that are already available in the global scope (do not repeat them in your response):
 
   async fetchPageAsMarkdown(url) -> scrapes the contents of the given url asynchronously and returns the relevant content "magically" if used with "await". The return value is a string containing the result of scraping the page and contains useful content that can be passed to askChatbotToPerformPromptOnContent. This function is capable of performing web scraping and data manipulation
 
