@@ -9,14 +9,17 @@ export type Role = keyof typeof RolesToPrompt
 export type Message = {
   user: string
   truncate: boolean
+  encrypted: boolean
   hide: boolean
 } | {
   assistant: string
   truncate: boolean
+  encrypted: boolean
   hide: boolean
 } | {
   system: string
   truncate: boolean
+  encrypted: boolean
   hide: boolean
 }
 

@@ -4,10 +4,60 @@ import { Chat } from '../common/Chat'
 import { Message, Model } from '../common/types'
 import gptApiClient from '../common/apiClient'
 import Dashboard from '@/components/Dashboard'
-import { createHash } from 'crypto'
+import { AES, SHA256, enc } from 'crypto-js'
 
 function hash(str: string) {
-  return createHash('sha256').update(str).digest('hex');
+  return SHA256(str).toString()
+}
+
+function encryptMessage(message: string, apiKey: string) {
+  return AES.encrypt(message, apiKey).toString()
+}
+
+function decryptMessage(encryptedMessage: string, apiKey: string) {
+  return AES.decrypt(encryptedMessage, apiKey).toString(enc.Utf8)
+}
+
+function encryptMessages(messages: Message[], key: string) {
+  return messages.map((message) => {
+    const [sender] = Object.keys(message)
+    const encryptedMessage = encryptMessage((message as any)[sender], key)
+    return {
+      ...message,
+      [sender]: encryptedMessage,
+      encrypted: true,
+    }
+  })
+}
+
+function decryptHistory(historyList: History[], key: string) {
+  return historyList.map((history) => {
+    const decryptedMessages = decryptMessages(history.messages, key)
+    return {
+      ...history,
+      messages: decryptedMessages
+    }
+  })
+}
+
+function decryptMessages(messages: Message[], key: string) {
+  return messages.map((message) => {
+    if (!message.encrypted) {
+      return message
+    }
+    const [sender] = Object.keys(message)
+    const decryptedMessage = decryptMessage((message as any)[sender], key)
+    return {
+      ...message,
+      [sender]: decryptedMessage,
+      encrypted: false
+    }
+  })
+}
+
+type History = {
+  id: string
+  messages: Message[]
 }
 
 export default function Home() {
@@ -20,7 +70,7 @@ export default function Home() {
   const modelSelectRef = useRef<HTMLSelectElement>(null)
   const spinnerRef = useRef<HTMLDivElement>(null)
 
-  const [history, setHistory] = useState<{ id: string; messages: Message[] }[]>([])
+  const [history, setHistory] = useState<History[]>([])
   const [chatId, setChatId] = useState<string | null>(null)
   const [initialized, setInitialized] = useState<boolean>(false)
   const updateHistoryRef = useRef<((messages: Message[]) => void) | null>(null)
@@ -48,41 +98,39 @@ export default function Home() {
       })
   }
 
-  updateHistoryRef.current = (messages: Message[]) => {
-    fetch('/api/history', {
+  updateHistoryRef.current = async (messages: Message[]) => {
+    const apiToken = localStorage.getItem('apiToken') || ''
+    const data: History[] | { error: string } = await fetch('/api/history', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        user: hash(localStorage.getItem('apiToken') || ''),
+        user: hash(apiToken),
         id: chatId,
-        messages,
+        messages: encryptMessages(messages, apiToken)
       }),
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          errorMessageRef.current!.innerText = data.error
-          return
-        }
-        setChatId(data.slice(-1)[0].id)
-        setHistory(data)
-      })
+    if ('error' in data) {
+      errorMessageRef.current!.innerText = data.error
+      return
+    }
+    setChatId(data.slice(-1)[0].id)
+    setHistory(decryptHistory(data, apiToken))
   }
 
-  const fetchHistory = () => {
-    fetch(`/api/history?user=${hash(localStorage.getItem('apiToken') || '')}`, {
+  const fetchHistory = async () => {
+    const apiToken = localStorage.getItem('apiToken') || ''
+    const data: History[] | { error: string } = await fetch(`/api/history?user=${hash(apiToken)}`, {
       method: 'GET',
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          errorMessageRef.current!.innerText = data.error
-          return
-        }
-        setHistory(data)
-      })
+    if ('error' in data) {
+      errorMessageRef.current!.innerText = data.error
+      return
+    }
+    setHistory(decryptHistory(data, apiToken))
   }
 
   const createNewChat = () => {
@@ -229,7 +277,7 @@ export default function Home() {
                 });
                 spinnerRef.current?.classList.add('hidden');
                 errorMessageRef.current!.classList.add('hidden')
-                updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
+                await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
                 return;
               }
             } else {
@@ -249,7 +297,7 @@ export default function Home() {
             });
             spinnerRef.current?.classList.add('hidden');
             errorMessageRef.current!.classList.add('hidden')
-            updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
+            await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
           } catch (err) {
             console.error(err);
             errorMessageRef.current!.innerText = 'Something went wrong. Please try again.';
