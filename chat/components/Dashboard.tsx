@@ -84,8 +84,11 @@ export default function Dashboard({
                       <ul role="list" className="flex flex-1 flex-col gap-y-7">
                         <li>
                           <ul role="list" className="-mx-2 space-y-1">
-                            <li onClick={onNewChatClick} className="flex justify-center">
+                            <li onClick={onNewChatClick} className="mt-auto flex justify-center">
                               <NewChatButton onClick={onNewChatClick} />
+                            </li>
+                            <li className="mt-auto flex justify-center">
+                              <a className="font-thin" href="/privacy-and-security">End-to-end encrypted history <LockClosedIcon className="inline w-3" /></a>
                             </li>
                             {history.slice().reverse().map((item) => (
                               <li key={item.id}>
@@ -133,8 +136,11 @@ export default function Dashboard({
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
                   <ul role="list" className="-mx-2 space-y-1">
-                    <li className="flex justify-center">
+                    <li className="flex mt-auto justify-center">
                       <NewChatButton onClick={onNewChatClick} />
+                    </li>
+                    <li className="mt-auto flex justify-center">
+                      <a className="font-thin" href="/privacy-and-security">End-to-end encrypted history <LockClosedIcon className="inline w-3" /></a>
                     </li>
                     {history.slice().reverse().map((item) => (
                       <li key={item.id}>
