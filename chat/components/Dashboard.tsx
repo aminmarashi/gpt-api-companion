@@ -87,9 +87,6 @@ export default function Dashboard({
                             <li onClick={onNewChatClick} className="mt-auto flex justify-center">
                               <NewChatButton onClick={onNewChatClick} />
                             </li>
-                            <li className="mt-auto flex justify-center">
-                              <a className="font-thin" href="/privacy-and-security">End-to-end encrypted history <LockClosedIcon className="inline w-3" /></a>
-                            </li>
                             {history.slice().reverse().map((item) => (
                               <li key={item.id}>
                                 <div className='flex justify-between'>
@@ -110,14 +107,8 @@ export default function Dashboard({
                             ))}
                           </ul>
                         </li>
-                        <li className="mt-auto">
-                          <a
-                            href="/privacy-and-security"
-                            className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
-                          >
-                            <LockClosedIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
-                            Privacy and security
-                          </a>
+                        <li className="mt-auto py-8 flex justify-center">
+                          <a className="font-thin" href="/privacy-and-security"><LockClosedIcon className="inline w-4" /> End-to-end encrypted history</a>
                         </li>
                       </ul>
                     </nav>
@@ -139,9 +130,6 @@ export default function Dashboard({
                     <li className="flex mt-auto justify-center">
                       <NewChatButton onClick={onNewChatClick} />
                     </li>
-                    <li className="mt-auto flex justify-center">
-                      <a className="font-thin" href="/privacy-and-security">End-to-end encrypted history <LockClosedIcon className="inline w-3" /></a>
-                    </li>
                     {history.slice().reverse().map((item) => (
                       <li key={item.id}>
                         <div className='flex justify-between'>
@@ -162,14 +150,8 @@ export default function Dashboard({
                     ))}
                   </ul>
                 </li>
-                <li className="mt-auto">
-                  <a
-                    href="/privacy-and-security"
-                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white"
-                  >
-                    <LockClosedIcon className="h-6 w-6 shrink-0" aria-hidden="true" />
-                    Privacy and security
-                  </a>
+                <li className="mt-auto py-8 flex justify-center">
+                  <a className="font-thin" href="/privacy-and-security"><LockClosedIcon className="inline w-4" /> End-to-end encrypted history</a>
                 </li>
               </ul>
             </nav>
