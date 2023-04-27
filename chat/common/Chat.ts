@@ -77,7 +77,7 @@ export class Chat {
     const wordCount = countWordsInMessages(this.messages);
 
     if (wordCount > limit) {
-      if (lastCount === wordCount) {
+      if (lastCount) {
         const largestMessage = this.messages.filter(m => !m.truncate).reduce((acc, message) => {
           const [sender] = Object.keys(message) as Role[];
           const text = (message as any)[sender] as string;
