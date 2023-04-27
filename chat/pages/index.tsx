@@ -30,16 +30,6 @@ function encryptMessages(messages: Message[], key: string) {
   })
 }
 
-function encryptHistory(historyList: History[], key: string) {
-  return historyList.map((history) => {
-    const encryptedMessages = encryptMessages(history.messages, key)
-    return {
-      ...history,
-      messages: encryptedMessages
-    }
-  })
-}
-
 function decryptHistory(historyList: History[], key: string) {
   return historyList.map((history) => {
     const decryptedMessages = decryptMessages(history.messages, key)
@@ -76,13 +66,13 @@ export default function Home() {
   const chatFormRef = useRef<HTMLFormElement>(null)
   const userInputRef = useRef<HTMLTextAreaElement>(null)
   const chatElementRef = useRef<HTMLDivElement>(null)
-  const errorMessageRef = useRef<HTMLDivElement>(null)
   const modelSelectRef = useRef<HTMLSelectElement>(null)
-  const spinnerRef = useRef<HTMLDivElement>(null)
 
   const [history, setHistory] = useState<History[]>([])
   const [chatId, setChatId] = useState<string | null>(null)
   const [initialized, setInitialized] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const updateHistoryRef = useRef<((messages: Message[]) => void) | null>(null)
   const chatRef = useRef<Chat | null>(null)
 
@@ -102,7 +92,7 @@ export default function Home() {
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          errorMessageRef.current!.innerText = data.error
+          setErrorMessage(data.error)
           return
         }
         setHistory(decryptHistory(data, apiToken))
@@ -124,7 +114,7 @@ export default function Home() {
     })
       .then((res) => res.json())
     if ('error' in data) {
-      errorMessageRef.current!.innerText = data.error
+      setErrorMessage(data.error)
       return
     }
     setChatId(data.slice(-1)[0].id)
@@ -138,7 +128,7 @@ export default function Home() {
     })
       .then((res) => res.json())
     if ('error' in data) {
-      errorMessageRef.current!.innerText = data.error
+      setErrorMessage(data.error)
       return
     }
     // TODO: Remove once all chat history is encrypted
@@ -160,7 +150,7 @@ export default function Home() {
           })
         } catch (e) {
           console.error(e)
-          errorMessageRef.current!.innerText = 'Unable to encrypt messages in history, please manually open and modify a chat history to encrypt it.'
+          setErrorMessage('Unable to encrypt messages in history, please manually open and modify a chat history to encrypt it.')
         }
       }
     }
@@ -220,7 +210,7 @@ export default function Home() {
             gptApiClient.setModel(model);
           }
           try {
-            spinnerRef.current?.classList.remove('hidden');
+            setIsLoading(true);
             if (message.includes('/sudo')) {
               const orphanElement = document.createElement('div');
               const sudoChat = new Chat(orphanElement)
@@ -309,8 +299,8 @@ export default function Home() {
                   sender: 'assistant',
                   message: 'I am sorry but I am not able to solve this task. Please use a different prompt.'
                 });
-                spinnerRef.current?.classList.add('hidden');
-                errorMessageRef.current!.classList.add('hidden')
+                setIsLoading(false);
+                setErrorMessage(null)
                 await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
                 return;
               }
@@ -329,13 +319,12 @@ export default function Home() {
               sender: 'assistant',
               message: response
             });
-            spinnerRef.current?.classList.add('hidden');
-            errorMessageRef.current!.classList.add('hidden')
+            setIsLoading(false);
+            setErrorMessage(null)
             await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
           } catch (err) {
             console.error(err);
-            errorMessageRef.current!.innerText = 'Something went wrong. Please try again.';
-            errorMessageRef.current!.classList.remove('hidden')
+            setErrorMessage('Something went wrong. Trying again might help.');
           }
         } else {
           alert('Please set your GPT API Token in the extension settings.');
@@ -371,16 +360,16 @@ export default function Home() {
         </div>
       </div>
       <div className="w-full">
-        <div ref={errorMessageRef} id="errorMessage"
-          className="hidden mb-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-          {/* Error message will be added here dynamically */}
+        <div
+          className={"mb-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" + (errorMessage ? '' : ' hidden')}>
+          {errorMessage}
         </div>
         <div className="bg-white shadow-md rounded p-4">
           <form ref={chatFormRef} id="chatForm">
             <textarea ref={userInputRef} id="userInput" className="w-full h-32 rounded p-2 border-gray-300 text-gray-800"
               placeholder="Type your message..."></textarea>
             <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-2">
-              <span ref={spinnerRef} id="spinner" className="mr-1 hidden">
+              <span className={"mr-1" + (isLoading ? '' : ' hidden')}>
                 <svg className="inline w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <rect className="spinner_jCIR" x="1" y="6" fill="white" width="2.8" height="12" />
                   <rect className="spinner_jCIR spinner_upm8" fill="white" x="5.8" y="6" width="2.8" height="12" />
