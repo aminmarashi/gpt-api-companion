@@ -174,7 +174,11 @@ export default function Home() {
     for (const cancellable of cancellablesRef.current) {
       cancellable('cancelled')
     }
+  }
+
+  const cleanUp = () => {
     clearCancellables()
+    setIsLoading(false)
   }
 
   function cancellable<T>(promise: Promise<T>): Promise<T> {
@@ -226,17 +230,19 @@ export default function Home() {
       let message = userInputRef.current?.value.trim();
 
       if (isLoadingRef.current) {
-        return cancel();
+        cancel();
+        return cleanUp();
       }
 
       if (!message) {
-        return
+        return cleanUp();
       }
 
       const apiToken = localStorage.getItem('apiToken');
 
       if (!apiToken) {
-        return alert('Please set your GPT API Token in the extension settings.');
+        alert('Please set your GPT API Token in the extension settings.');
+        return cleanUp();
       }
 
       gptApiClient.setApiKey(apiToken);
@@ -324,13 +330,11 @@ export default function Home() {
               break;
             } catch (e) {
               if (e === 'cancelled') {
-                return;
+                return cleanUp();
               }
               console.error(e)
               console.log(`Retrying... ${retriesLeft} retries left`)
               continue;
-            } finally {
-              setIsLoading(false);
             }
           }
           orphanElement.remove();
@@ -341,7 +345,7 @@ export default function Home() {
             });
             setErrorMessage(null)
             await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
-            return;
+            return cleanUp();
           }
         } else {
           await chat.appendMessage({
@@ -362,14 +366,13 @@ export default function Home() {
         await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
       } catch (err) {
         if (err === 'cancelled') {
-          return;
+          return cleanUp();
         }
         console.error(err);
         setErrorMessage('Something went wrong. Trying again might help.');
       } finally {
-        setIsLoading(false);
+        cleanUp();
       }
-      clearCancellables()
     });
   }, [initialized])
 
