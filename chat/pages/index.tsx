@@ -71,10 +71,17 @@ export default function Home() {
   const [history, setHistory] = useState<History[]>([])
   const [chatId, setChatId] = useState<string | null>(null)
   const [initialized, setInitialized] = useState<boolean>(false)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoadingOriginal] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const updateHistoryRef = useRef<((messages: Message[]) => void) | null>(null)
   const chatRef = useRef<Chat | null>(null)
+  const cancellablesRef = useRef<((reason: 'cancelled') => void)[]>([])
+  const isLoadingRef = useRef<boolean>(false)
+
+  const setIsLoading = (isLoading: boolean) => {
+    isLoadingRef.current = isLoading
+    setIsLoadingOriginal(isLoading)
+  }
 
   const onHistoryClick = (id: string) => {
     setChatId(id)
@@ -163,6 +170,24 @@ export default function Home() {
     chatRef.current?.resetMessages()
   }
 
+  const cancel = () => {
+    for (const cancellable of cancellablesRef.current) {
+      cancellable('cancelled')
+    }
+    clearCancellables()
+  }
+
+  function cancellable<T>(promise: Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      promise.then(resolve, reject)
+      cancellablesRef.current.push(reject)
+    })
+  }
+
+  function clearCancellables() {
+    cancellablesRef.current = []
+  }
+
   useEffect(() => {
     if (!initialized) {
       setInitialized(true)
@@ -200,30 +225,40 @@ export default function Home() {
       e.preventDefault();
       let message = userInputRef.current?.value.trim();
 
-      if (message) {
-        const apiToken = localStorage.getItem('apiToken');
+      if (isLoadingRef.current) {
+        return cancel();
+      }
 
-        if (apiToken) {
-          gptApiClient.setApiKey(apiToken);
-          if (modelSelectRef.current!.value) {
-            const model = modelSelectRef.current!.value === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO;
-            gptApiClient.setModel(model);
-          }
-          try {
-            setIsLoading(true);
-            if (message.includes('/sudo')) {
-              const orphanElement = document.createElement('div');
-              const sudoChat = new Chat(orphanElement)
-              const existingMessages = chat.getMessages(gptApiClient.getModel());
-              sudoChat.setMessages(existingMessages);
-              await chat.appendMessage({
-                sender: 'user',
-                message
-              });
-              userInputRef.current!.value = '';
-              sudoChat.appendMessage({
-                sender: 'system',
-                message: `
+      if (!message) {
+        return
+      }
+
+      const apiToken = localStorage.getItem('apiToken');
+
+      if (!apiToken) {
+        return alert('Please set your GPT API Token in the extension settings.');
+      }
+
+      gptApiClient.setApiKey(apiToken);
+      if (modelSelectRef.current!.value) {
+        const model = modelSelectRef.current!.value === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO;
+        gptApiClient.setModel(model);
+      }
+      try {
+        setIsLoading(true);
+        if (message.includes('/sudo')) {
+          const orphanElement = document.createElement('div');
+          const sudoChat = new Chat(orphanElement)
+          const existingMessages = chat.getMessages(gptApiClient.getModel());
+          sudoChat.setMessages(existingMessages);
+          await chat.appendMessage({
+            sender: 'user',
+            message
+          });
+          userInputRef.current!.value = '';
+          sudoChat.appendMessage({
+            sender: 'system',
+            message: `
   I have made two functions that are already available in the global scope (do not repeat them in your response):
 
   async fetchPageAsMarkdown(url) -> scrapes the contents of the given url asynchronously and returns the relevant content "magically" if used with "await". The return value is a string containing the result of scraping the page and contains useful content that can be passed to askChatbotToPerformPromptOnContent. This function is capable of performing web scraping and data manipulation
@@ -236,100 +271,105 @@ export default function Home() {
 
   Hint: The resulting code is the logic wrapped inside of an async function called executeChatbotLogic. The function should return the answer to the prompt. Do not add anything after the async function definition. DO NOT CALL THE executeChatbotLogic function (don't add 'executeChatbotLogic();' to the code). Do not use IIFE either.
                 `
-              })
-              sudoChat.appendMessage({
-                sender: 'user',
-                message: message!.replace(/\/sudo/g, '')
-              })
-              let retriesLeft = modelSelectRef.current!.value === 'gpt-4' ? 2 : 5;
-              while (retriesLeft-- > 0) {
-                let prompt = await gptApiClient.chat(sudoChat.getMessages(gptApiClient.getModel()), {
-                  temperature: 0.2
-                })
-                try {
-                  // @ts-ignore
-                  async function fetchPageAsMarkdown(url: string) {
-                    return await fetch('/api/fetcher', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({
-                        url,
-                        user: hash(localStorage.getItem('apiToken') || ''),
-                      })
-                    }).then(res => res.text())
-                  }
+          })
+          sudoChat.appendMessage({
+            sender: 'user',
+            message: message!.replace(/\/sudo/g, '')
+          })
+          let retriesLeft = modelSelectRef.current!.value === 'gpt-4' ? 2 : 5;
+          while (retriesLeft-- > 0) {
+            let prompt = await cancellable(gptApiClient.chat(sudoChat.getMessages(gptApiClient.getModel()), {
+              temperature: 0.2
+            }))
+            try {
+              // @ts-ignore
+              async function fetchPageAsMarkdown(url: string) {
+                return await fetch('/api/fetcher', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    url,
+                    user: hash(localStorage.getItem('apiToken') || ''),
+                  })
+                }).then(res => res.text())
+              }
 
-                  // @ts-ignore
-                  async function askChatbotToPerformPromptOnContent(offlineQueryFromChatbot: string, markdownContent: string) {
-                    if (!markdownContent.trim()) {
-                      throw new Error('No content')
-                    }
-                    return `The following content is downloaded from the website mentioned in the prompt in markdown format, use it to generate an answer to this prompt: '${offlineQueryFromChatbot}'. Do not The content (do not complain if the content is not complete):
+              // @ts-ignore
+              async function askChatbotToPerformPromptOnContent(offlineQueryFromChatbot: string, markdownContent: string) {
+                if (!markdownContent.trim()) {
+                  throw new Error('No content')
+                }
+                return `The following content is downloaded from the website mentioned in the prompt in markdown format, use it to generate an answer to this prompt: '${offlineQueryFromChatbot}'. Do not The content (do not complain if the content is not complete):
                     
                     ${markdownContent}, `
-                  }
+              }
 
-                  if (prompt.includes('```')) {
-                    prompt = prompt.split('```')[1]
-                  }
-                  const fn = (() => eval(`(
+              if (prompt.includes('```')) {
+                prompt = prompt.split('```')[1]
+              }
+              const fn = (() => eval(`(
                     ${prompt}
                   )`))();
-                  message = await fn();
-                  if (!message) {
-                    throw new Error('No message')
-                  }
-                  await chat.appendMessage({
-                    sender: 'user',
-                    hide: true,
-                    message
-                  });
-                  break;
-                } catch (e) {
-                  console.error(e)
-                  console.log(`Retrying... ${retriesLeft} retries left`)
-                  continue;
-                }
+              message = await cancellable(fn());
+              if (!message) {
+                throw new Error('No message')
               }
-              orphanElement.remove();
-              if (retriesLeft <= 0) {
-                await chat.appendMessage({
-                  sender: 'assistant',
-                  message: 'I am sorry but I am not able to solve this task. Please use a different prompt.'
-                });
-                setIsLoading(false);
-                setErrorMessage(null)
-                await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
-                return;
-              }
-            } else {
               await chat.appendMessage({
                 sender: 'user',
+                hide: true,
                 message
               });
-              userInputRef.current!.value = '';
+              break;
+            } catch (e) {
+              if (e === 'cancelled') {
+                return;
+              }
+              console.error(e)
+              console.log(`Retrying... ${retriesLeft} retries left`)
+              continue;
+            } finally {
+              setIsLoading(false);
             }
-
-            const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
-              frequency_penalty: 2
-            });
+          }
+          orphanElement.remove();
+          if (retriesLeft <= 0) {
             await chat.appendMessage({
               sender: 'assistant',
-              message: response
+              message: 'I am sorry but I am not able to solve this task. Please use a different prompt.'
             });
-            setIsLoading(false);
             setErrorMessage(null)
             await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
-          } catch (err) {
-            console.error(err);
-            setErrorMessage('Something went wrong. Trying again might help.');
+            return;
           }
         } else {
-          alert('Please set your GPT API Token in the extension settings.');
+          await chat.appendMessage({
+            sender: 'user',
+            message
+          });
+          userInputRef.current!.value = '';
         }
+
+        const response = await cancellable(gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
+          frequency_penalty: 2
+        }));
+        await chat.appendMessage({
+          sender: 'assistant',
+          message: response
+        });
+        setErrorMessage(null)
+        await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
+      } catch (err) {
+        if (err === 'cancelled') {
+          return;
+        }
+        console.error(err);
+        setErrorMessage('Something went wrong. Trying again might help.');
+      } finally {
+        setIsLoading(false);
       }
+      clearCancellables()
     });
   }, [initialized])
 
@@ -378,7 +418,7 @@ export default function Home() {
                   <rect className="spinner_jCIR spinner_dy3W" fill="white" x="20.2" y="6" width="2.8" height="12" />
                 </svg>
               </span>
-              Send
+              {isLoading ? 'Cancel' : 'Send'}
             </button>
             {/* a drop down to select the GPT model */}
             <select ref={modelSelectRef} id="model"
@@ -391,6 +431,6 @@ export default function Home() {
       </div>
       <div className="hidden bg-gray-50 bg-gray-100"></div>
       <script type="module" src="../dist/options.js"></script>
-    </Dashboard>
+    </Dashboard >
   )
 }
