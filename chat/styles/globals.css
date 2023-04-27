@@ -26,3 +26,39 @@ body {
 a {
   @apply underline text-green-800 hover:text-green-900 visited:text-purple-600
 }
+
+.spinner_jCIR {
+  animation: spinner_B8Vq .9s linear infinite;
+  animation-delay: -.9s
+}
+
+.spinner_upm8 {
+  animation-delay: -.8s
+}
+
+.spinner_2eL5 {
+  animation-delay: -.7s
+}
+
+.spinner_Rp9l {
+  animation-delay: -.6s
+}
+
+.spinner_dy3W {
+  animation-delay: -.5s
+}
+
+@keyframes spinner_B8Vq {
+  0%,
+  66.66% {
+    animation-timing-function: cubic-bezier(0.36, .61, .3, .98);
+    y: 6px;
+    height: 12px
+  }
+
+  33.33% {
+    animation-timing-function: cubic-bezier(0.36, .61, .3, .98);
+      y: 1px;
+      height: 22px
+  }
+}
