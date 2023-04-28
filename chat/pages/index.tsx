@@ -370,7 +370,6 @@ export default function Home() {
     >
       <main className="flex py-4 lg:pl-72 bg-gray-700 min-h-[calc(100vh-3.5rem)] lg:min-h-screen">
         <div className="w-full flex flex-col justify-stretch px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl text-gray-100 mb-5">Chat with GPT API Companion</h2>
           <div ref={chatElementRef} id="chat" className="w-full h-full overflow-y-scroll p-4 mr-4 bg-white shadow-md rounded p-2 text-gray-800">
             {/* Chat will be added here dynamically */}
           </div>
