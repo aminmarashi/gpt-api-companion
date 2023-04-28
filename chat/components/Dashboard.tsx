@@ -168,11 +168,7 @@ export default function Dashboard({
         <div className="flex-1 text-sm font-semibold leading-6 text-white">Dashboard</div>
       </div>
 
-      <main className="py-10 lg:pl-72 bg-gray-700 min-h-screen">
-        <div className="container px-4 sm:px-6 lg:px-8">
-          {children}
-        </div>
-      </main>
+      {children}
     </div>
   )
 }

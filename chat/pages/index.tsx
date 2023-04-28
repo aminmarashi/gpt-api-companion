@@ -368,43 +368,45 @@ export default function Home() {
       onDelete={onHistoryDelete}
       onNewChatClick={createNewChat}
     >
-      <h2 className="text-2xl text-gray-100 mb-5">Chat with GPT API Companion</h2>
-      <div className="w-full mr-4 bg-white shadow-md rounded p-2 text-gray-800">
-        <div ref={chatElementRef} id="chat" className="overflow-y-scroll h-96">
-          {/* Chat will be added here dynamically */}
+      <main className="flex py-4 lg:pl-72 bg-gray-700 min-h-[calc(100vh-3.5rem)] lg:min-h-screen">
+        <div className="w-full flex flex-col justify-stretch px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl text-gray-100 mb-5">Chat with GPT API Companion</h2>
+          <div ref={chatElementRef} id="chat" className="w-full h-full overflow-y-scroll p-4 mr-4 bg-white shadow-md rounded p-2 text-gray-800">
+            {/* Chat will be added here dynamically */}
+          </div>
+          <div className="w-full">
+            <div
+              className={"mb-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" + (errorMessage ? '' : ' hidden')}>
+              {errorMessage}
+            </div>
+            <div className="bg-white shadow-md rounded p-4">
+              <form ref={chatFormRef} id="chatForm">
+                <textarea ref={userInputRef} id="userInput" className="w-full rounded p-2 border-gray-300 text-gray-800"
+                  placeholder="Type your message..."></textarea>
+                <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-2">
+                  <span className={"mr-1" + (isLoading ? '' : ' hidden')}>
+                    <svg className="inline w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <rect className="spinner_jCIR" x="1" y="6" fill="white" width="2.8" height="12" />
+                      <rect className="spinner_jCIR spinner_upm8" fill="white" x="5.8" y="6" width="2.8" height="12" />
+                      <rect className="spinner_jCIR spinner_2eL5" fill="white" x="10.6" y="6" width="2.8" height="12" />
+                      <rect className="spinner_jCIR spinner_Rp9l" fill="white" x="15.4" y="6" width="2.8" height="12" />
+                      <rect className="spinner_jCIR spinner_dy3W" fill="white" x="20.2" y="6" width="2.8" height="12" />
+                    </svg>
+                  </span>
+                  {isLoading ? 'Cancel' : 'Send'}
+                </button>
+                {/* a drop down to select the GPT model */}
+                <select ref={modelSelectRef} id="model"
+                  className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow m-2">
+                  <option value="gpt-3.5-turbo">GPT 3.5</option>
+                  <option value="gpt-4">GPT 4</option>
+                </select>
+              </form>
+            </div>
+          </div>
+          <div className="hidden bg-gray-50 bg-gray-100"></div>
         </div>
-      </div>
-      <div className="w-full">
-        <div
-          className={"mb-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" + (errorMessage ? '' : ' hidden')}>
-          {errorMessage}
-        </div>
-        <div className="bg-white shadow-md rounded p-4">
-          <form ref={chatFormRef} id="chatForm">
-            <textarea ref={userInputRef} id="userInput" className="w-full h-32 rounded p-2 border-gray-300 text-gray-800"
-              placeholder="Type your message..."></textarea>
-            <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-2">
-              <span className={"mr-1" + (isLoading ? '' : ' hidden')}>
-                <svg className="inline w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <rect className="spinner_jCIR" x="1" y="6" fill="white" width="2.8" height="12" />
-                  <rect className="spinner_jCIR spinner_upm8" fill="white" x="5.8" y="6" width="2.8" height="12" />
-                  <rect className="spinner_jCIR spinner_2eL5" fill="white" x="10.6" y="6" width="2.8" height="12" />
-                  <rect className="spinner_jCIR spinner_Rp9l" fill="white" x="15.4" y="6" width="2.8" height="12" />
-                  <rect className="spinner_jCIR spinner_dy3W" fill="white" x="20.2" y="6" width="2.8" height="12" />
-                </svg>
-              </span>
-              {isLoading ? 'Cancel' : 'Send'}
-            </button>
-            {/* a drop down to select the GPT model */}
-            <select ref={modelSelectRef} id="model"
-              className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow m-2">
-              <option value="gpt-3.5-turbo">GPT 3.5</option>
-              <option value="gpt-4">GPT 4</option>
-            </select>
-          </form>
-        </div>
-      </div>
-      <div className="hidden bg-gray-50 bg-gray-100"></div>
+      </main>
     </Dashboard >
   )
 }
