@@ -60,12 +60,20 @@ function saveToken() {
 async function getToken() {
   chrome.tabs.create({
     active: true,
-    url: 'https://chat.lit.codes'
+    url: 'https://chat.lit.codes/options'
   }, function (tab) {
+    if (!tab.id) {
+      console.log('Tab not found.');
+      return;
+    }
     chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: saveToken,
     }, async function () {
+      if (!tab.id) {
+        console.log('Tab not found.');
+        return;
+      }
       const storage = await chrome.storage.sync.get('apiToken');
       if (storage.apiToken) {
         chrome.tabs.remove(tab.id);
