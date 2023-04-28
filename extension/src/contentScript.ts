@@ -174,7 +174,7 @@ function createSummaryWindow() {
   const windowWrapper = document.createElement('div');
   windowWrapper.id = '--gpt-api-companion-summary-window';
   windowWrapper.innerHTML = `
-    <div id="draggable" style="position: fixed; top: 0; background-color: white; color: black; z-index: 10000; padding: 10px; border: 1px solid #ccc; box-sizing: border-box;">
+    <div id="draggable" style="all:revert; position: fixed; top: 0; background-color: white; color: black; z-index: 10000; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; max-height: 75vh; max-width: 75%; display: flex; flex-direction: column; justify-content: space-between; font-size: medium;">
       <style>
         .hidden {
           display: none;
@@ -184,7 +184,7 @@ function createSummaryWindow() {
         <h3>Summary</h3>
         <button id="--gpt-api-companion-window-close" style="border: none; background-color: transparent; cursor: pointer; font-size: 18px;">x</button>
       </div>
-      <div id="--gpt-api-companion-summary" style="margin-bottom: 1rem;">
+      <div id="--gpt-api-companion-summary" style="margin-bottom: 1rem; height: 100%; overflow: scroll;">
         <!-- Summary will be displayed here -->
       </div>
       <form id="--gpt-api-companion-form" style="display: flex; flex-direction: column;">

@@ -21,19 +21,13 @@ chrome.runtime.onInstalled.addListener(async () => {
       return;
     }
     if (!tab || !tab.id) {
-      alert('This extension only works on web pages.');
+      console.log('This extension only works on web pages.');
       return;
     }
     if (info.menuItemId === 'summarize-page') {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        if (!tabs || !tabs[0] || !tabs[0].id) return;
-        chrome.tabs.sendMessage(tabs[0].id, { action: "summarize-page" }, function (response) { });
-      });
+      await chrome.tabs.sendMessage(tab.id, { action: "summarize-page" });
     } else if (info.menuItemId === 'summarize-text') {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        if (!tabs || !tabs[0] || !tabs[0].id) return;
-        chrome.tabs.sendMessage(tabs[0].id, { action: "summarize-text" }, function (response) { });
-      });
+      await chrome.tabs.sendMessage(tab.id, { action: "summarize-text" });
     }
   });
 
@@ -53,7 +47,7 @@ function saveToken() {
   if (apiToken) {
     chrome.storage.sync.set({ apiToken });
   } else {
-    alert('Please set your API Token in the extension options.')
+    console.log('Please set your API Token in the extension options.')
   }
 }
 
