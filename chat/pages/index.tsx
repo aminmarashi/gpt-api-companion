@@ -61,8 +61,6 @@ type History = {
 }
 
 export default function Home() {
-  const optionsFormRef = useRef<HTMLFormElement>(null)
-  const apiTokenRef = useRef<HTMLInputElement>(null)
   const chatFormRef = useRef<HTMLFormElement>(null)
   const userInputRef = useRef<HTMLTextAreaElement>(null)
   const chatElementRef = useRef<HTMLDivElement>(null)
@@ -204,25 +202,11 @@ export default function Home() {
 
     fetchHistory();
 
-    apiTokenRef.current!.value = localStorage.getItem('apiToken') || '';
-
     userInputRef.current?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         chatFormRef.current?.dispatchEvent(new Event('submit'));
       }
-    });
-
-    optionsFormRef.current?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const apiToken = apiTokenRef.current?.value.trim();
-      if (!apiToken) {
-        alert('Please enter a valid GPT API Token.');
-        return;
-      }
-      localStorage.setItem('apiToken', apiToken || '')
-
-      alert('Options are successfully saved.');
     });
 
     chatFormRef.current?.addEventListener('submit', async (e) => {
@@ -384,18 +368,6 @@ export default function Home() {
       onDelete={onHistoryDelete}
       onNewChatClick={createNewChat}
     >
-      <h2 className="text-2xl text-gray-100 mb-5">GPT API Companion - Options</h2>
-      <form ref={optionsFormRef} id="optionsForm" className="flex">
-        <div>
-          <label htmlFor="apiToken" className="block text-sm text-gray-100 mb-2">GPT API Token:</label>
-          <input type="password" ref={apiTokenRef} id="apiToken" name="apiToken" className="w-full rounded p-2 border-gray-300 text-gray-800" />
-          <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-4">Save</button>
-        </div>
-        <div className="ml-8 text-gray-100">
-          Install the <a target='_blank' className="text-gray-400 hover:text-gray-500" href="https://chrome.google.com/webstore/detail/gpt-api-companion/bdaanmhmamgpeppfdajedeliilghopol">Chrome Extension</a>
-        </div>
-      </form>
-      <hr className="my-5" />
       <h2 className="text-2xl text-gray-100 mb-5">Chat with GPT API Companion</h2>
       <div className="w-full mr-4 bg-white shadow-md rounded p-2 text-gray-800">
         <div ref={chatElementRef} id="chat" className="overflow-y-scroll h-96">
@@ -433,7 +405,6 @@ export default function Home() {
         </div>
       </div>
       <div className="hidden bg-gray-50 bg-gray-100"></div>
-      <script type="module" src="../dist/options.js"></script>
     </Dashboard >
   )
 }
