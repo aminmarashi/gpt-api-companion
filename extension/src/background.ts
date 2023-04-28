@@ -1,3 +1,31 @@
+chrome.contextMenus.onClicked.addListener(async function (info, tab) {
+  try {
+    const storage = await chrome.storage.sync.get('apiToken');
+    if (!storage.apiToken) {
+      getToken();
+    }
+    const updatedStorage = await chrome.storage.sync.get('apiToken');
+    if (!updatedStorage.apiToken) {
+      return;
+    }
+    if (!tab || !tab.id) {
+      console.log('This extension only works on web pages.');
+      return;
+    }
+    if (info.menuItemId === 'summarize-page') {
+      await chrome.tabs.sendMessage(tab.id, { action: "summarize-page" });
+    } else if (info.menuItemId === 'summarize-text') {
+      await chrome.tabs.sendMessage(tab.id, { action: "summarize-text" });
+    }
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+chrome.action.onClicked.addListener(() => {
+  chrome.tabs.create({ url: 'https://chat.lit.codes' });
+});
+
 chrome.runtime.onInstalled.addListener(async () => {
   // Add context menu item
   chrome.contextMenus.create({
@@ -9,34 +37,6 @@ chrome.runtime.onInstalled.addListener(async () => {
     id: "summarize-page",
     title: "Summarize Page",
     contexts: ["all"],
-  });
-
-  chrome.contextMenus.onClicked.addListener(async function (info, tab) {
-    try {
-      const storage = await chrome.storage.sync.get('apiToken');
-      if (!storage.apiToken) {
-        getToken();
-      }
-      const updatedStorage = await chrome.storage.sync.get('apiToken');
-      if (!updatedStorage.apiToken) {
-        return;
-      }
-      if (!tab || !tab.id) {
-        console.log('This extension only works on web pages.');
-        return;
-      }
-      if (info.menuItemId === 'summarize-page') {
-        await chrome.tabs.sendMessage(tab.id, { action: "summarize-page" });
-      } else if (info.menuItemId === 'summarize-text') {
-        await chrome.tabs.sendMessage(tab.id, { action: "summarize-text" });
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  });
-
-  chrome.action.onClicked.addListener(() => {
-    chrome.tabs.create({ url: 'https://chat.lit.codes' });
   });
 
   try {
