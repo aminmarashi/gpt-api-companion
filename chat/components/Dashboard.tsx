@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import {
   Bars3Icon,
+  GlobeEuropeAfricaIcon,
   LockClosedIcon,
   MinusIcon,
   PlusIcon,
@@ -108,8 +109,7 @@ export default function Dashboard({
                         </ul>
                       </li>
                       <li className="mt-auto py-8 flex items-start flex-col">
-                        <a className="block text-lg" href="/options"><WrenchScrewdriverIcon className="inline w-4" /> Options</a>
-                        <a className="block font-thin mt-2" href="/privacy-and-security"><LockClosedIcon className="inline w-4" /> End-to-end encrypted history</a>
+                        <BottomLinks />
                       </li>
                     </ul>
                   </nav>
@@ -152,8 +152,7 @@ export default function Dashboard({
                 </ul>
               </li>
               <li className="mt-auto py-8 flex items-start flex-col">
-                <a className="block text-lg" href="/options"><WrenchScrewdriverIcon className="inline w-4" /> Options</a>
-                <a className="block font-thin mt-2" href="/privacy-and-security"><LockClosedIcon className="inline w-4" /> End-to-end encrypted history</a>
+                <BottomLinks />
               </li>
             </ul>
           </nav>
@@ -185,6 +184,16 @@ function NewChatButton({ onClick }: { onClick: () => void }): JSX.Element {
     <button onClick={onClick} className="flex items-end">
       <span className="text-gray-100 pt-4">New chat</span><PlusIcon className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
     </button>
+  )
+}
+
+function BottomLinks(): JSX.Element {
+  return (
+    <>
+      <a className="block text-lg" href="/options"><WrenchScrewdriverIcon className="inline w-4" /> Options</a>
+      <a className="block text-lg" target="_blank" href="https://chrome.google.com/webstore/detail/gpt-api-companion/bdaanmhmamgpeppfdajedeliilghopol"><GlobeEuropeAfricaIcon className="inline w-4" /> Chrome extension</a>
+      <a className="block font-thin mt-2 -mb-4" href="/privacy-and-security"><LockClosedIcon className="inline w-4" /> End-to-end encrypted history</a>
+    </>
   )
 }
 
