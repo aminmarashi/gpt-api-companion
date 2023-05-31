@@ -225,7 +225,9 @@ export default function Home() {
       const apiToken = localStorage.getItem('apiToken');
 
       if (!apiToken) {
-        alert('Please set your GPT API Token in the extension settings.');
+        if (window.confirm('Please set your OpenAI API Token in the Options page.')) {
+          window.location.href = `${window.location.origin}/options`;
+        }
         return cleanUp();
       }
 
