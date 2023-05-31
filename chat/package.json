@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.1.1",
-    "@types/markdown-it": "^12.2.3"
+    "@types/markdown-it": "^12.2.3",
+    "vercel": "^30.0.0"
   }
 }
