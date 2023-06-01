@@ -114,10 +114,6 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
           truncate: true,
           hide: true
         });
-        chat.appendMessage({
-          sender: 'assistant',
-          message: `Summarizing ${document.title}...`,
-        })
         spinner.classList.remove('hidden');
         const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()));
         chat.appendMessage({
