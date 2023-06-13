@@ -6,6 +6,17 @@ import gptApiClient from '../common/apiClient'
 import Dashboard from '@/components/Dashboard'
 import { AES, SHA256, enc } from 'crypto-js'
 
+function getGPTModel(selection: string) {
+    switch (selection) {
+        case 'gpt-4':
+            return Model.GPT4;
+        case 'gpt-3.5-turbo-16k':
+            return Model.GPT3_5_TURBO_16K;
+        default:
+            return Model.GPT3_5_TURBO;
+    }
+}
+
 function hash(str: string) {
   return SHA256(str).toString()
 }
@@ -233,8 +244,7 @@ export default function Home() {
 
       gptApiClient.setApiKey(apiToken);
       if (modelSelectRef.current!.value) {
-        const model = modelSelectRef.current!.value === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO;
-        gptApiClient.setModel(model);
+        gptApiClient.setModel(getGPTModel(modelSelectRef.current!.value));
       }
       try {
         setIsLoading(true);
@@ -400,6 +410,7 @@ export default function Home() {
                 <select ref={modelSelectRef} id="model"
                   className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow m-2">
                   <option value="gpt-3.5-turbo">GPT 3.5</option>
+                  <option value="gpt-3.5-turbo-16k">GPT 3.5 (long context)</option>
                   <option value="gpt-4">GPT 4</option>
                 </select>
               </form>
