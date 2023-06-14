@@ -286,32 +286,35 @@ export default function Home() {
           frequency_penalty: 2,
           functions
         }));
-        if ('function_call' in response) {
-          let args;
-          let triesRemaining = 5;
-          while (triesRemaining-- > 0) {
-            console.log('response', response)
-            if ((response as any).function_call.name === 'fetchPageAsMarkdown') {
-              try {
-                args = JSON.parse((response as any).function_call.arguments);
-                break;
-              } catch { }
-            }
-            response = await cancellable(gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
-              frequency_penalty: 2,
-              functions
-            }));
+        chat.appendMessage({
+          sender: 'system',
+          message: `Return the function params for fetchPageAsMarkdown in json`,
+          hide: true
+        });
+        let args;
+        let triesRemaining = 5;
+        while ('function_call' in response && triesRemaining-- > 0) {
+          console.log('response', response)
+          if ((response as any).function_call.name === 'fetchPageAsMarkdown') {
+            try {
+              args = JSON.parse((response as any).function_call.arguments);
+              break;
+            } catch { }
           }
-          if (args) {
-            const message = await cancellable(fetchPageAsMarkdown(args))
-            await chat.appendMessage({
-              sender: 'function',
-              functionName: 'fetchPageAsMarkdown',
-              hide: true,
-              message
-            });
-            response = await cancellable(gptApiClient.chat(chat.getMessages(gptApiClient.getModel())));
-          }
+          response = await cancellable(gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
+            frequency_penalty: 2,
+            functions
+          }));
+        }
+        if (args) {
+          const message = await cancellable(fetchPageAsMarkdown(args))
+          await chat.appendMessage({
+            sender: 'function',
+            functionName: 'fetchPageAsMarkdown',
+            hide: true,
+            message
+          });
+          response = await cancellable(gptApiClient.chat(chat.getMessages(gptApiClient.getModel())));
         }
         await chat.appendMessage({
           sender: 'assistant',
