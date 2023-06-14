@@ -16,6 +16,12 @@ interface CompletionOptions {
   best_of?: number;
   logit_bias?: { [key: string]: number };
   user?: string;
+  functions?: {
+    name: string;
+    description: string;
+    parameters: Record<string, any>;
+    function_call: 'auto'
+  }[]
 }
 
 class GPTApiClient {
@@ -51,20 +57,21 @@ class GPTApiClient {
     return response.json();
   }
 
-  async chat(messages: Message[], options?: CompletionOptions): Promise<string> {
+  async chat(messages: Message[], options?: CompletionOptions): Promise<{content: string} | { function_call: {name: string}, [key: string]: any }> {
     const response = await this.post("/v1/chat/completions", {
       ...(options || {}),
       messages: messages.map((message) => {
         const [role] = Object.keys(message);
         return {
           role,
+          ...(role === 'function' ? { name: (message as any).functionName } : {}),
           content: message[role as keyof Message],
         }
       }),
       model: this.model,
     });
 
-    return response.choices[0].message.content;
+    return response.choices[0].message;
   }
 }
 

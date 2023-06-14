@@ -5,8 +5,7 @@ import GPT3Tokenizer from 'gpt3-tokenizer';
 const tokenizer = new GPT3Tokenizer({ type: 'gpt3' }); // or 'codex'
 
 const limits = {
-  [Model.GPT3_5_TURBO]: 4096,
-  [Model.GPT3_5_TURBO_16K]: 16384,
+  [Model.GPT3_5_TURBO]: 16384,
   [Model.GPT4]: 8192
 }
 
@@ -21,21 +20,27 @@ export class Chat {
   async appendMessage({
     sender,
     message,
+    functionName,
     truncate = false,
     hide = false
   }: {
     sender: Role,
     message: string,
+    functionName?: string,
     truncate?: boolean,
     hide?: boolean
   }) {
     this.messages.push({
       [sender]: message,
+      functionName,
       hide,
       truncate
-    } as Message);
-    if (sender === 'system' || hide) {
-      // We don't want the system message to be shown
+    } as any);
+    if (hide) {
+      return;
+    }
+    if (sender !== 'user' && sender !== 'assistant') {
+      // Only show the message if it's from the chatbot or the user
       return;
     }
     this.addMessageToChatElement(sender, message);
