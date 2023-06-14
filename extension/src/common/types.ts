@@ -24,6 +24,6 @@ export type Message = {
 }
 
 export enum Model {
-  GPT3_5_TURBO = 'gpt-3.5-turbo',
-  GPT4 = 'gpt-4',
+  GPT3_5_TURBO = 'gpt-3.5-turbo-16k',
+  GPT4 = 'gpt-4-0613',
 }

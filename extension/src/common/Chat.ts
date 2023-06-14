@@ -5,7 +5,7 @@ import GPT3Tokenizer from 'gpt3-tokenizer';
 const tokenizer = new GPT3Tokenizer({ type: 'gpt3' }); // or 'codex'
 
 const limits = {
-  [Model.GPT3_5_TURBO]: 4096,
+  [Model.GPT3_5_TURBO]: 16384,
   [Model.GPT4]: 8192
 }
 
