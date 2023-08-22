@@ -57,7 +57,7 @@ class GPTApiClient {
     return response.json();
   }
 
-  async chat(messages: Message[], options?: CompletionOptions): Promise<{content: string} | { function_call: {name: string}, [key: string]: any }> {
+  async chat(messages: Message[], options?: CompletionOptions): Promise<{ content: string } | { function_call: { name: string }, [key: string]: any }> {
     const response = await this.post("/v1/chat/completions", {
       ...(options || {}),
       messages: messages.map((message) => {
@@ -71,6 +71,9 @@ class GPTApiClient {
       model: this.model,
     });
 
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
     return response.choices[0].message;
   }
 }

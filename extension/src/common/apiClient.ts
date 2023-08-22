@@ -64,6 +64,9 @@ class GPTApiClient {
       model: this.model,
     });
 
+    if (response.error) {
+      throw new Error(response.error.message);
+    }
     return response.choices[0].message.content;
   }
 }

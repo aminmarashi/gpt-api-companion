@@ -327,7 +327,7 @@ export default function Home() {
           return cleanUp();
         }
         console.error(err);
-        setErrorMessage('Something went wrong. Trying again might help.');
+        setErrorMessage((err as Error).message);
       } finally {
         cleanUp();
       }
