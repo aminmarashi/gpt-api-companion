@@ -33,7 +33,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "crypto-js": "^4.1.1",
+    "crypto-js": "^4.2.0",
     "gpt3-tokenizer": "^1.1.5",
     "highlight.js": "^11.7.0",
     "html-to-text": "^9.0.5",
