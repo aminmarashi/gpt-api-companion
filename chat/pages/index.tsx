@@ -274,65 +274,9 @@ export default function Home() {
           message,
         });
         userInputRef.current!.value = "";
-        const functions = [
-          {
-            name: "fetchPageAsMarkdown",
-            description:
-              'Scrapes the contents of the given url asynchronously and returns the relevant content "magically" if used with "await". The return value is a string containing the result of scraping the page and contains useful content that can be passed to askChatbotToPerformPromptOnContent. This function is capable of performing web scraping and data manipulation',
-            parameters: {
-              type: "object",
-              properties: {
-                url: {
-                  type: "string",
-                  description: "The url to scrape",
-                },
-              },
-              required: ["url"],
-            },
-            function_call: "auto" as const,
-          },
-        ];
-
         let response = await cancellable(
-          gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
-            frequency_penalty: 2,
-            functions,
-          })
+          gptApiClient.chat(chat.getMessages(gptApiClient.getModel()))
         );
-        chat.appendMessage({
-          sender: "system",
-          message: `Return the function params for fetchPageAsMarkdown in json`,
-          hide: true,
-        });
-        let args;
-        let triesRemaining = 5;
-        while ("function_call" in response && triesRemaining-- > 0) {
-          console.log("response", response);
-          if ((response as any).function_call.name === "fetchPageAsMarkdown") {
-            try {
-              args = JSON.parse((response as any).function_call.arguments);
-              break;
-            } catch {}
-          }
-          response = await cancellable(
-            gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
-              frequency_penalty: 2,
-              functions,
-            })
-          );
-        }
-        if (args) {
-          const message = await cancellable(fetchPageAsMarkdown(args));
-          await chat.appendMessage({
-            sender: "function",
-            functionName: "fetchPageAsMarkdown",
-            hide: true,
-            message,
-          });
-          response = await cancellable(
-            gptApiClient.chat(chat.getMessages(gptApiClient.getModel()))
-          );
-        }
         await chat.appendMessage({
           sender: "assistant",
           message: response.content,
@@ -449,7 +393,6 @@ export default function Home() {
                 >
                   <option value="gpt-3.5-turbo">GPT 3.5</option>
                   <option value="gpt-4">GPT 4</option>
-                  <option value="gpt-4-32k">GPT 4 (32K)</option>
                 </select>
                 Read more about&nbsp;
                 <a

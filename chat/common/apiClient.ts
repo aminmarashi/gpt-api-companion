@@ -20,12 +20,16 @@ interface CompletionOptions {
     name: string;
     description: string;
     parameters: Record<string, any>;
-    function_call: 'auto'
-  }[]
+    function_call: "auto";
+  }[];
 }
 
 class GPTApiClient {
-  constructor(private apiKey?: string, private model: Model = Model.GPT3_5_TURBO, private apiUrl: string = "https://api.openai.com") { }
+  constructor(
+    private apiKey?: string,
+    private model: Model = Model.GPT3_5_TURBO,
+    private apiUrl: string = "https://api.openai.com"
+  ) {}
 
   setApiKey(apiKey: string) {
     this.apiKey = apiKey;
@@ -41,7 +45,9 @@ class GPTApiClient {
 
   async post(path: string, data: any) {
     if (!this.apiKey) {
-      throw new Error("Please set your GPT API Token by clicking on the extension icon.");
+      throw new Error(
+        "Please set your GPT API Token by clicking on the extension icon."
+      );
     }
     const headers = {
       "Content-Type": "application/json",
@@ -57,16 +63,18 @@ class GPTApiClient {
     return response.json();
   }
 
-  async chat(messages: Message[], options?: CompletionOptions): Promise<{ content: string } | { function_call: { name: string }, [key: string]: any }> {
+  async chat(
+    messages: Message[],
+    options?: CompletionOptions
+  ): Promise<{ content: string }> {
     const response = await this.post("/v1/chat/completions", {
       ...(options || {}),
       messages: messages.map((message) => {
         const [role] = Object.keys(message);
         return {
           role,
-          ...(role === 'function' ? { name: (message as any).functionName } : {}),
           content: message[role as keyof Message],
-        }
+        };
       }),
       model: this.model,
     });
