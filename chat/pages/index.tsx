@@ -1,14 +1,17 @@
-import 'highlight.js/styles/atom-one-dark.css'
-import { useEffect, useRef, useState } from 'react'
-import { Chat } from '../common/Chat'
-import { Message, Model } from '../common/types'
-import gptApiClient from '../common/apiClient'
-import Dashboard from '@/components/Dashboard'
-import { AES, SHA256, enc } from 'crypto-js'
+import "highlight.js/styles/atom-one-dark.css";
+import { useEffect, useRef, useState } from "react";
+import { Chat } from "../common/Chat";
+import { Message, Model } from "../common/types";
+import gptApiClient from "../common/apiClient";
+import Dashboard from "@/components/Dashboard";
+import { AES, SHA256, enc } from "crypto-js";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 function getGPTModel(selection: string) {
   switch (selection) {
-    case 'gpt-4':
+    case "gpt-4-32k":
+      return Model.GPT4_32K;
+    case "gpt-4":
       return Model.GPT4;
     default:
       return Model.GPT3_5_TURBO;
@@ -16,222 +19,225 @@ function getGPTModel(selection: string) {
 }
 
 function hash(str: string) {
-  return SHA256(str).toString()
+  return SHA256(str).toString();
 }
 
 function encryptMessage(message: string, apiKey: string) {
-  return AES.encrypt(message, apiKey).toString()
+  return AES.encrypt(message, apiKey).toString();
 }
 
 function decryptMessage(encryptedMessage: string, apiKey: string) {
-  return AES.decrypt(encryptedMessage, apiKey).toString(enc.Utf8)
+  return AES.decrypt(encryptedMessage, apiKey).toString(enc.Utf8);
 }
 
 function encryptMessages(messages: Message[], key: string) {
   return messages.map((message) => {
-    const [sender] = Object.keys(message)
-    const encryptedMessage = encryptMessage((message as any)[sender], key)
+    const [sender] = Object.keys(message);
+    const encryptedMessage = encryptMessage((message as any)[sender], key);
     return {
       ...message,
       [sender]: encryptedMessage,
       encrypted: true,
-    }
-  })
+    };
+  });
 }
 
 function decryptHistory(historyList: History[], key: string) {
   return historyList.map((history) => {
-    const decryptedMessages = decryptMessages(history.messages, key)
+    const decryptedMessages = decryptMessages(history.messages, key);
     return {
       ...history,
-      messages: decryptedMessages
-    }
-  })
+      messages: decryptedMessages,
+    };
+  });
 }
 
 function decryptMessages(messages: Message[], key: string) {
   return messages.map((message) => {
     if (!message.encrypted) {
-      return message
+      return message;
     }
-    const [sender] = Object.keys(message)
-    const decryptedMessage = decryptMessage((message as any)[sender], key)
+    const [sender] = Object.keys(message);
+    const decryptedMessage = decryptMessage((message as any)[sender], key);
     return {
       ...message,
       [sender]: decryptedMessage,
-      encrypted: false
-    }
-  })
+      encrypted: false,
+    };
+  });
 }
 
 type History = {
-  id: string
-  messages: Message[]
-}
+  id: string;
+  messages: Message[];
+};
 
 export default function Home() {
-  const chatFormRef = useRef<HTMLFormElement>(null)
-  const userInputRef = useRef<HTMLTextAreaElement>(null)
-  const chatElementRef = useRef<HTMLDivElement>(null)
-  const modelSelectRef = useRef<HTMLSelectElement>(null)
+  const chatFormRef = useRef<HTMLFormElement>(null);
+  const userInputRef = useRef<HTMLTextAreaElement>(null);
+  const chatElementRef = useRef<HTMLDivElement>(null);
+  const modelSelectRef = useRef<HTMLSelectElement>(null);
 
-  const [history, setHistory] = useState<History[]>([])
-  const [chatId, setChatId] = useState<string | null>(null)
-  const [initialized, setInitialized] = useState<boolean>(false)
-  const [isLoading, setIsLoadingOriginal] = useState<boolean>(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const updateHistoryRef = useRef<((messages: Message[]) => void) | null>(null)
-  const chatRef = useRef<Chat | null>(null)
-  const cancellablesRef = useRef<((reason: 'cancelled') => void)[]>([])
-  const isLoadingRef = useRef<boolean>(false)
+  const [history, setHistory] = useState<History[]>([]);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState<boolean>(false);
+  const [isLoading, setIsLoadingOriginal] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const updateHistoryRef = useRef<((messages: Message[]) => void) | null>(null);
+  const chatRef = useRef<Chat | null>(null);
+  const cancellablesRef = useRef<((reason: "cancelled") => void)[]>([]);
+  const isLoadingRef = useRef<boolean>(false);
 
   const setIsLoading = (isLoading: boolean) => {
-    isLoadingRef.current = isLoading
-    setIsLoadingOriginal(isLoading)
-  }
+    isLoadingRef.current = isLoading;
+    setIsLoadingOriginal(isLoading);
+  };
 
   const onHistoryClick = (id: string) => {
-    setChatId(id)
-    const messages = history.find((h) => h.id === id)?.messages
+    setChatId(id);
+    const messages = history.find((h) => h.id === id)?.messages;
     if (messages) {
-      chatRef.current!.setMessages(messages)
+      chatRef.current!.setMessages(messages);
     }
-  }
+  };
 
   const onHistoryDelete = (id: string) => {
-    const apiToken = localStorage.getItem('apiToken') || ''
+    const apiToken = localStorage.getItem("apiToken") || "";
     fetch(`/api/history?user=${hash(apiToken)}&id=${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     })
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
-          setErrorMessage(data.error)
-          return
+          setErrorMessage(data.error);
+          return;
         }
-        setHistory(decryptHistory(data, apiToken))
-      })
-  }
+        setHistory(decryptHistory(data, apiToken));
+      });
+  };
 
   updateHistoryRef.current = async (messages: Message[]) => {
-    const apiToken = localStorage.getItem('apiToken') || ''
-    const data: History[] | { error: string } = await fetch('/api/history', {
-      method: 'POST',
+    const apiToken = localStorage.getItem("apiToken") || "";
+    const data: History[] | { error: string } = await fetch("/api/history", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         user: hash(apiToken),
         id: chatId,
-        messages: encryptMessages(messages, apiToken)
+        messages: encryptMessages(messages, apiToken),
       }),
-    })
-      .then((res) => res.json())
-    if ('error' in data) {
-      setErrorMessage(data.error)
-      return
+    }).then((res) => res.json());
+    if ("error" in data) {
+      setErrorMessage(data.error);
+      return;
     }
-    setChatId(data.slice(-1)[0].id)
-    setHistory(decryptHistory(data, apiToken))
-  }
+    setChatId(data.slice(-1)[0].id);
+    setHistory(decryptHistory(data, apiToken));
+  };
 
   const fetchHistory = async () => {
-    const apiToken = localStorage.getItem('apiToken') || ''
-    const data: History[] | { error: string } = await fetch(`/api/history?user=${hash(apiToken)}`, {
-      method: 'GET',
-    })
-      .then((res) => res.json())
-    if ('error' in data) {
-      setErrorMessage(data.error)
-      return
+    const apiToken = localStorage.getItem("apiToken") || "";
+    const data: History[] | { error: string } = await fetch(
+      `/api/history?user=${hash(apiToken)}`,
+      {
+        method: "GET",
+      }
+    ).then((res) => res.json());
+    if ("error" in data) {
+      setErrorMessage(data.error);
+      return;
     }
     // TODO: Remove once all chat history is encrypted
     for (const history of data) {
-      const messages = history.messages
-      const chatId = history.id
+      const messages = history.messages;
+      const chatId = history.id;
       if (!messages.find((m) => m.encrypted)) {
         try {
-          await fetch('/api/history', {
-            method: 'POST',
+          await fetch("/api/history", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               user: hash(apiToken),
               id: chatId,
-              messages: encryptMessages(messages, apiToken)
+              messages: encryptMessages(messages, apiToken),
             }),
-          })
+          });
         } catch (e) {
-          console.error(e)
-          setErrorMessage('Unable to encrypt messages in history, please manually open and modify a chat history to encrypt it.')
+          console.error(e);
+          setErrorMessage(
+            "Unable to encrypt messages in history, please manually open and modify a chat history to encrypt it."
+          );
         }
       }
     }
-    setHistory(decryptHistory(data, apiToken))
-  }
+    setHistory(decryptHistory(data, apiToken));
+  };
 
   const createNewChat = () => {
-    setChatId(null)
-    userInputRef.current!.value = ''
-    chatRef.current?.resetMessages()
-  }
+    setChatId(null);
+    userInputRef.current!.value = "";
+    chatRef.current?.resetMessages();
+  };
 
   const cancel = () => {
     for (const cancellable of cancellablesRef.current) {
-      cancellable('cancelled')
+      cancellable("cancelled");
     }
-  }
+  };
 
   const cleanUp = () => {
-    clearCancellables()
-    setIsLoading(false)
-  }
+    clearCancellables();
+    setIsLoading(false);
+  };
 
   function cancellable<T>(promise: Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
-      promise.then(resolve, reject)
-      cancellablesRef.current.push(reject)
-    })
+      promise.then(resolve, reject);
+      cancellablesRef.current.push(reject);
+    });
   }
 
   function clearCancellables() {
-    cancellablesRef.current = []
+    cancellablesRef.current = [];
   }
 
   async function fetchPageAsMarkdown({ url }: { url: string }) {
-    return await fetch('/api/fetcher', {
-      method: 'POST',
+    return await fetch("/api/fetcher", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         url,
-        user: hash(localStorage.getItem('apiToken') || ''),
-      })
-    }).then(res => res.text())
+        user: hash(localStorage.getItem("apiToken") || ""),
+      }),
+    }).then((res) => res.text());
   }
 
   useEffect(() => {
     if (!initialized) {
-      setInitialized(true)
+      setInitialized(true);
     } else {
-      return
+      return;
     }
 
-    chatRef.current = new Chat(chatElementRef.current!)
-    const chat = chatRef.current
+    chatRef.current = new Chat(chatElementRef.current!);
+    const chat = chatRef.current;
 
     fetchHistory();
 
-    userInputRef.current?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+    userInputRef.current?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        chatFormRef.current?.dispatchEvent(new Event('submit'));
+        chatFormRef.current?.dispatchEvent(new Event("submit"));
       }
     });
 
-    chatFormRef.current?.addEventListener('submit', async (e) => {
+    chatFormRef.current?.addEventListener("submit", async (e) => {
       e.preventDefault();
       let message = userInputRef.current?.value.trim();
 
@@ -244,10 +250,14 @@ export default function Home() {
         return cleanUp();
       }
 
-      const apiToken = localStorage.getItem('apiToken');
+      const apiToken = localStorage.getItem("apiToken");
 
       if (!apiToken) {
-        if (window.confirm('Please set your OpenAI API Token in the Options page.')) {
+        if (
+          window.confirm(
+            "Please set your OpenAI API Token in the Options page."
+          )
+        ) {
           window.location.href = `${window.location.origin}/options`;
         }
         return cleanUp();
@@ -260,70 +270,79 @@ export default function Home() {
       try {
         setIsLoading(true);
         await chat.appendMessage({
-          sender: 'user',
-          message
+          sender: "user",
+          message,
         });
-        userInputRef.current!.value = '';
+        userInputRef.current!.value = "";
         const functions = [
           {
-            name: 'fetchPageAsMarkdown',
-            description: 'Scrapes the contents of the given url asynchronously and returns the relevant content "magically" if used with "await". The return value is a string containing the result of scraping the page and contains useful content that can be passed to askChatbotToPerformPromptOnContent. This function is capable of performing web scraping and data manipulation',
+            name: "fetchPageAsMarkdown",
+            description:
+              'Scrapes the contents of the given url asynchronously and returns the relevant content "magically" if used with "await". The return value is a string containing the result of scraping the page and contains useful content that can be passed to askChatbotToPerformPromptOnContent. This function is capable of performing web scraping and data manipulation',
             parameters: {
-              type: 'object',
+              type: "object",
               properties: {
                 url: {
-                  type: 'string',
-                  description: 'The url to scrape'
-                }
+                  type: "string",
+                  description: "The url to scrape",
+                },
               },
-              required: ['url']
+              required: ["url"],
             },
-            function_call: 'auto' as const
-          }
+            function_call: "auto" as const,
+          },
         ];
 
-        let response = await cancellable(gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
-          frequency_penalty: 2,
-          functions
-        }));
+        let response = await cancellable(
+          gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
+            frequency_penalty: 2,
+            functions,
+          })
+        );
         chat.appendMessage({
-          sender: 'system',
+          sender: "system",
           message: `Return the function params for fetchPageAsMarkdown in json`,
-          hide: true
+          hide: true,
         });
         let args;
         let triesRemaining = 5;
-        while ('function_call' in response && triesRemaining-- > 0) {
-          console.log('response', response)
-          if ((response as any).function_call.name === 'fetchPageAsMarkdown') {
+        while ("function_call" in response && triesRemaining-- > 0) {
+          console.log("response", response);
+          if ((response as any).function_call.name === "fetchPageAsMarkdown") {
             try {
               args = JSON.parse((response as any).function_call.arguments);
               break;
-            } catch { }
+            } catch {}
           }
-          response = await cancellable(gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
-            frequency_penalty: 2,
-            functions
-          }));
+          response = await cancellable(
+            gptApiClient.chat(chat.getMessages(gptApiClient.getModel()), {
+              frequency_penalty: 2,
+              functions,
+            })
+          );
         }
         if (args) {
-          const message = await cancellable(fetchPageAsMarkdown(args))
+          const message = await cancellable(fetchPageAsMarkdown(args));
           await chat.appendMessage({
-            sender: 'function',
-            functionName: 'fetchPageAsMarkdown',
+            sender: "function",
+            functionName: "fetchPageAsMarkdown",
             hide: true,
-            message
+            message,
           });
-          response = await cancellable(gptApiClient.chat(chat.getMessages(gptApiClient.getModel())));
+          response = await cancellable(
+            gptApiClient.chat(chat.getMessages(gptApiClient.getModel()))
+          );
         }
         await chat.appendMessage({
-          sender: 'assistant',
-          message: response.content
+          sender: "assistant",
+          message: response.content,
         });
-        setErrorMessage(null)
-        await updateHistoryRef.current!(chat.getMessages(gptApiClient.getModel()));
+        setErrorMessage(null);
+        await updateHistoryRef.current!(
+          chat.getMessages(gptApiClient.getModel())
+        );
       } catch (err) {
-        if (err === 'cancelled') {
+        if (err === "cancelled") {
           return cleanUp();
         }
         console.error(err);
@@ -332,7 +351,7 @@ export default function Home() {
         cleanUp();
       }
     });
-  }, [initialized])
+  }, [initialized]);
 
   return (
     <Dashboard
@@ -344,42 +363,108 @@ export default function Home() {
     >
       <main className="flex py-4 lg:pl-72 bg-gray-700 min-h-[calc(100vh-3.5rem)] lg:min-h-screen">
         <div className="w-full flex flex-col justify-stretch px-4 sm:px-6 lg:px-8">
-          <div ref={chatElementRef} id="chat" className="w-full h-full overflow-y-scroll p-4 mr-4 bg-white shadow-md rounded p-2 text-gray-800">
+          <div
+            ref={chatElementRef}
+            id="chat"
+            className="w-full h-full overflow-y-scroll p-4 mr-4 bg-white shadow-md rounded p-2 text-gray-800"
+          >
             {/* Chat will be added here dynamically */}
           </div>
           <div className="w-full">
             <div
-              className={"mb-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" + (errorMessage ? '' : ' hidden')}>
+              className={
+                "mb-2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" +
+                (errorMessage ? "" : " hidden")
+              }
+            >
               {errorMessage}
             </div>
             <div className="bg-white shadow-md rounded p-4">
               <form ref={chatFormRef} id="chatForm">
-                <textarea ref={userInputRef} id="userInput" className="w-full rounded p-2 border-gray-300 text-gray-800"
-                  placeholder="Type your message..."></textarea>
-                <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-2">
-                  <span className={"mr-1" + (isLoading ? '' : ' hidden')}>
-                    <svg className="inline w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <rect className="spinner_jCIR" x="1" y="6" fill="white" width="2.8" height="12" />
-                      <rect className="spinner_jCIR spinner_upm8" fill="white" x="5.8" y="6" width="2.8" height="12" />
-                      <rect className="spinner_jCIR spinner_2eL5" fill="white" x="10.6" y="6" width="2.8" height="12" />
-                      <rect className="spinner_jCIR spinner_Rp9l" fill="white" x="15.4" y="6" width="2.8" height="12" />
-                      <rect className="spinner_jCIR spinner_dy3W" fill="white" x="20.2" y="6" width="2.8" height="12" />
+                <textarea
+                  ref={userInputRef}
+                  id="userInput"
+                  className="w-full rounded p-2 border-gray-300 text-gray-800"
+                  placeholder="Type your message..."
+                ></textarea>
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4 py-2 mt-2"
+                >
+                  <span className={"mr-1" + (isLoading ? "" : " hidden")}>
+                    <svg
+                      className="inline w-4 h-4"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <rect
+                        className="spinner_jCIR"
+                        x="1"
+                        y="6"
+                        fill="white"
+                        width="2.8"
+                        height="12"
+                      />
+                      <rect
+                        className="spinner_jCIR spinner_upm8"
+                        fill="white"
+                        x="5.8"
+                        y="6"
+                        width="2.8"
+                        height="12"
+                      />
+                      <rect
+                        className="spinner_jCIR spinner_2eL5"
+                        fill="white"
+                        x="10.6"
+                        y="6"
+                        width="2.8"
+                        height="12"
+                      />
+                      <rect
+                        className="spinner_jCIR spinner_Rp9l"
+                        fill="white"
+                        x="15.4"
+                        y="6"
+                        width="2.8"
+                        height="12"
+                      />
+                      <rect
+                        className="spinner_jCIR spinner_dy3W"
+                        fill="white"
+                        x="20.2"
+                        y="6"
+                        width="2.8"
+                        height="12"
+                      />
                     </svg>
                   </span>
-                  {isLoading ? 'Cancel' : 'Send'}
+                  {isLoading ? "Cancel" : "Send"}
                 </button>
                 {/* a drop down to select the GPT model */}
-                <select ref={modelSelectRef} id="model"
-                  className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow m-2">
+                <select
+                  ref={modelSelectRef}
+                  id="model"
+                  className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow m-2"
+                >
                   <option value="gpt-3.5-turbo">GPT 3.5</option>
                   <option value="gpt-4">GPT 4</option>
+                  <option value="gpt-4-32k">GPT 4 (32K)</option>
                 </select>
+                Read more about&nbsp;
+                <a
+                  href="https://platform.openai.com/docs/models"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  GPT models
+                </a>
               </form>
             </div>
           </div>
           <div className="hidden bg-gray-50 bg-gray-100"></div>
         </div>
       </main>
-    </Dashboard >
-  )
+    </Dashboard>
+  );
 }
