@@ -205,19 +205,6 @@ export default function Home() {
     cancellablesRef.current = [];
   }
 
-  async function fetchPageAsMarkdown({ url }: { url: string }) {
-    return await fetch("/api/fetcher", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        url,
-        user: hash(localStorage.getItem("apiToken") || ""),
-      }),
-    }).then((res) => res.text());
-  }
-
   useEffect(() => {
     if (!initialized) {
       setInitialized(true);
