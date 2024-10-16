@@ -73,6 +73,7 @@ export default function Home() {
   const [initialized, setInitialized] = useState<boolean>(false);
   const [isLoading, setIsLoadingOriginal] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [defaultModel, setDefaultModel] = useState<string>(Model.GPT_4O);
   const updateHistoryRef = useRef<((messages: Message[]) => void) | null>(null);
   const chatRef = useRef<Chat | null>(null);
   const cancellablesRef = useRef<((reason: "cancelled") => void)[]>([]);
@@ -202,6 +203,8 @@ export default function Home() {
       return;
     }
 
+    const defaultModel = localStorage.getItem("defaultModel") || "";
+    setDefaultModel(defaultModel);
     chatRef.current = new Chat(chatElementRef.current!);
     const chat = chatRef.current;
 
@@ -366,6 +369,8 @@ export default function Home() {
                 <select
                   ref={modelSelectRef}
                   id="model"
+                  defaultChecked={true}
+                  defaultValue={defaultModel}
                   className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow m-2"
                 >
                   {Object.values(Model).map((model) => (
