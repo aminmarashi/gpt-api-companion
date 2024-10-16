@@ -8,7 +8,6 @@ export const limits = {
   [Model.GPT_4O]: 128000,
   [Model.GPT_4O_MINI]: 128000,
   [Model.O1_PREVIEW]: 128000,
-  [Model.O1_MINI]: 128000,
 };
 
 export function getGPTModel(modelValue: Model): Model {
