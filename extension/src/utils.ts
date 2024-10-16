@@ -25,7 +25,7 @@ export async function getApiToken(): Promise<string> {
 
 export async function getsummarizerModel(): Promise<string> {
   return new Promise((resolve) => {
-    chrome.storage.sync.get("summarizerModel", ({ summarizerModel }) => {
+    chrome.storage.sync.get("defaultModel", ({ summarizerModel }) => {
       resolve(summarizerModel);
     });
   });
