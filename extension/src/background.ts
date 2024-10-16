@@ -53,7 +53,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   });
   chrome.contextMenus.create({
     id: "lit-chat",
-    title: "Chat with GPT API",
+    title: "GPT Chat Website",
     contexts: ["all"],
   });
 
