@@ -1,174 +1,200 @@
 import { Chat } from "./common/Chat";
 import gptApiClient from "./common/apiClient";
 import { Message, Model } from "./common/types";
-import { getApiToken, getsummarizerModel, safeGetSelectedText } from "./utils";
-import { convert } from 'html-to-text'
-import { AES, SHA256, enc } from 'crypto-js'
+import {
+  getApiToken,
+  getGPTModel,
+  getsummarizerModel,
+  safeGetSelectedText,
+} from "./utils";
+import { convert } from "html-to-text";
+import { AES, SHA256, enc } from "crypto-js";
 
-type History = { id: string, messages: Message[] }
+type History = { id: string; messages: Message[] };
 
 function hash(str: string) {
-  return SHA256(str).toString()
+  return SHA256(str).toString();
 }
 
 function encryptMessage(message: string, apiKey: string) {
-  return AES.encrypt(message, apiKey).toString()
+  return AES.encrypt(message, apiKey).toString();
 }
 
 function decryptMessage(encryptedMessage: string, apiKey: string) {
-  return AES.decrypt(encryptedMessage, apiKey).toString(enc.Utf8)
+  return AES.decrypt(encryptedMessage, apiKey).toString(enc.Utf8);
 }
 
 function encryptMessages(messages: Message[], key: string) {
   return messages.map((message) => {
-    const [sender] = Object.keys(message)
-    const encryptedMessage = encryptMessage((message as any)[sender], key)
+    const [sender] = Object.keys(message);
+    const encryptedMessage = encryptMessage((message as any)[sender], key);
     return {
       ...message,
       [sender]: encryptedMessage,
       encrypted: true,
-    }
-  })
+    };
+  });
 }
 
 function decryptHistory(historyList: History[], key: string) {
   return historyList.map((history) => {
-    const decryptedMessages = decryptMessages(history.messages, key)
+    const decryptedMessages = decryptMessages(history.messages, key);
     return {
       ...history,
-      messages: decryptedMessages
-    }
-  })
+      messages: decryptedMessages,
+    };
+  });
 }
 
 function decryptMessages(messages: Message[], key: string) {
   return messages.map((message) => {
     if (!message.encrypted) {
-      return message
+      return message;
     }
-    const [sender] = Object.keys(message)
-    const decryptedMessage = decryptMessage((message as any)[sender], key)
+    const [sender] = Object.keys(message);
+    const decryptedMessage = decryptMessage((message as any)[sender], key);
     return {
       ...message,
       [sender]: decryptedMessage,
-      encrypted: false
-    }
-  })
+      encrypted: false,
+    };
+  });
 }
 
-chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(async function (
+  message,
+  sender,
+  sendResponse
+) {
   const run = async () => {
-    let summary = document.getElementById('--gpt-api-companion-summary') as HTMLDivElement
+    let summary = document.getElementById(
+      "--gpt-api-companion-summary"
+    ) as HTMLDivElement;
     if (!summary) {
       createSummaryWindow();
     }
-    const summaryWindow = document.getElementById('--gpt-api-companion-summary-window') as HTMLDivElement;
-    summaryWindow.classList.remove('hidden');
-    summary = document.getElementById('--gpt-api-companion-summary') as HTMLDivElement
+    const summaryWindow = document.getElementById(
+      "--gpt-api-companion-summary-window"
+    ) as HTMLDivElement;
+    summaryWindow.classList.remove("hidden");
+    summary = document.getElementById(
+      "--gpt-api-companion-summary"
+    ) as HTMLDivElement;
 
-    const spinner = document.getElementById('--gpt-api-companion-spinner') as HTMLDivElement;
+    const spinner = document.getElementById(
+      "--gpt-api-companion-spinner"
+    ) as HTMLDivElement;
     const apiToken = await getApiToken();
     const summarizerModel = await getsummarizerModel();
     const chat = new Chat(summary);
     let history: History | undefined = undefined;
 
     const updateHistory = async (messages: Message[]) => {
-      fetch('https://chat.lit.codes/api/history', {
-        method: 'POST',
+      fetch("https://chat.lit.codes/api/history", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           user: hash(apiToken),
           id: history ? history.id : undefined,
-          messages: encryptMessages(messages, apiToken)
+          messages: encryptMessages(messages, apiToken),
         }),
       })
         .then((res) => res.json())
         .then((data: History[] | { error: string }) => {
-          if ('error' in data) {
-            console.log(data.error)
-            return
+          if ("error" in data) {
+            console.log(data.error);
+            return;
           }
-          history = decryptHistory(data, apiToken).slice(-1)[0]
-        })
+          history = decryptHistory(data, apiToken).slice(-1)[0];
+        });
     };
     if (apiToken) {
-      gptApiClient.setModel(summarizerModel === 'gpt-4' ? Model.GPT4 : Model.GPT3_5_TURBO);
+      gptApiClient.setModel(getGPTModel(summarizerModel));
       gptApiClient.setApiKey(apiToken);
       try {
-        let text = '';
-        if (message.action === 'summarize-page') {
+        let text = "";
+        if (message.action === "summarize-page") {
           text = convert(document.body.innerHTML);
         } else {
           text = safeGetSelectedText();
         }
         chat.appendMessage({
-          sender: 'system',
-          message: 'You are a summarizer bot that summarizes anything that comes next',
-          hide: true
+          sender: "system",
+          message:
+            "You are a summarizer bot that summarizes anything that comes next",
+          hide: true,
         });
         chat.appendMessage({
-          sender: 'user',
+          sender: "user",
           message: text,
           truncate: true,
-          hide: true
+          hide: true,
         });
-        spinner.classList.remove('hidden');
-        const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()));
+        spinner.classList.remove("hidden");
+        const response = await gptApiClient.chat(
+          chat.getMessages(gptApiClient.getModel())
+        );
         chat.appendMessage({
-          sender: 'assistant',
-          message: response
+          sender: "assistant",
+          message: response,
         });
-        spinner.classList.add('hidden');
+        spinner.classList.add("hidden");
         await updateHistory(chat.getMessages(gptApiClient.getModel()));
       } catch (err) {
         console.error(err);
       }
     } else {
-      alert('Please set your GPT API Token in the extension settings.');
+      alert("Please set your GPT API Token in the extension settings.");
     }
 
     // Attach question input event listener
-    const questionInput = document.getElementById('--gpt-api-companion-question') as HTMLInputElement;
-    const chatForm = document.getElementById('--gpt-api-companion-form') as HTMLFormElement;
-    chatForm.addEventListener('submit', async (event) => {
+    const questionInput = document.getElementById(
+      "--gpt-api-companion-question"
+    ) as HTMLInputElement;
+    const chatForm = document.getElementById(
+      "--gpt-api-companion-form"
+    ) as HTMLFormElement;
+    chatForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const question = questionInput.value.trim();
       if (question) {
         chat.appendMessage({
-          sender: 'user',
-          message: question
+          sender: "user",
+          message: question,
         });
-        questionInput.value = '';
-        spinner.classList.remove('hidden');
-        const response = await gptApiClient.chat(chat.getMessages(gptApiClient.getModel()));
+        questionInput.value = "";
+        spinner.classList.remove("hidden");
+        const response = await gptApiClient.chat(
+          chat.getMessages(gptApiClient.getModel())
+        );
         chat.appendMessage({
-          sender: 'assistant',
-          message: response
+          sender: "assistant",
+          message: response,
         });
-        spinner.classList.add('hidden');
+        spinner.classList.add("hidden");
         await updateHistory(chat.getMessages(gptApiClient.getModel()));
       }
     });
-    questionInput?.addEventListener('keypress', async (event) => {
-      if (event.key === 'Enter' && !event.shiftKey) {
+    questionInput?.addEventListener("keypress", async (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
-        chatForm.dispatchEvent(new Event('submit'));
+        chatForm.dispatchEvent(new Event("submit"));
       }
     });
-  }
+  };
 
   try {
-    await run()
+    await run();
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
 });
 
 function createSummaryWindow() {
-  const windowWrapper = document.createElement('div');
-  windowWrapper.id = '--gpt-api-companion-summary-window';
+  const windowWrapper = document.createElement("div");
+  windowWrapper.id = "--gpt-api-companion-summary-window";
   windowWrapper.innerHTML = `
     <div id="draggable" style="all:revert; position: fixed; top: 0; background-color: white; color: black; z-index: 10000; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; max-height: 75vh; max-width: 75%; display: flex; flex-direction: column; justify-content: space-between; font-size: medium;">
       <style>
@@ -201,56 +227,58 @@ function createSummaryWindow() {
   document.body.appendChild(windowWrapper);
 
   // Attach close button event listener
-  const closeButton = document.getElementById('--gpt-api-companion-window-close');
-  closeButton?.addEventListener('click', () => {
-    windowWrapper.classList.add('hidden');
+  const closeButton = document.getElementById(
+    "--gpt-api-companion-window-close"
+  );
+  closeButton?.addEventListener("click", () => {
+    windowWrapper.classList.add("hidden");
   });
 
   // Draggable functionality
-  const draggable = document.getElementById('draggable') as HTMLDivElement;
-  const header = document.getElementById('header') as HTMLDivElement;
+  const draggable = document.getElementById("draggable") as HTMLDivElement;
+  const header = document.getElementById("header") as HTMLDivElement;
 
-  header.addEventListener('mousedown', onMouseDown);
+  header.addEventListener("mousedown", onMouseDown);
 
   function onMouseDown(e: MouseEvent) {
     e.preventDefault();
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
   }
 
   function onMouseMove(e: MouseEvent) {
-    draggable.style.left = e.clientX + 'px';
-    draggable.style.top = e.clientY + 'px';
+    draggable.style.left = e.clientX + "px";
+    draggable.style.top = e.clientY + "px";
   }
 
   function onMouseUp() {
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener("mousemove", onMouseMove);
+    document.removeEventListener("mouseup", onMouseUp);
   }
 
   // Resizable functionality
-  const resizer = document.getElementById('resizer') as HTMLDivElement;
-  resizer.addEventListener('mousedown', onResizeMouseDown);
+  const resizer = document.getElementById("resizer") as HTMLDivElement;
+  resizer.addEventListener("mousedown", onResizeMouseDown);
 
   function onResizeMouseDown(e: MouseEvent) {
     e.preventDefault();
-    document.addEventListener('mousemove', onResizeMouseMove);
-    document.addEventListener('mouseup', onResizeMouseUp);
+    document.addEventListener("mousemove", onResizeMouseMove);
+    document.addEventListener("mouseup", onResizeMouseUp);
   }
 
   function onResizeMouseMove(e: MouseEvent) {
     const width = e.clientX - draggable.offsetLeft;
     const height = e.clientY - draggable.offsetTop;
-    draggable.style.width = width + 'px';
-    draggable.style.height = height + 'px';
+    draggable.style.width = width + "px";
+    draggable.style.height = height + "px";
   }
 
   function onResizeMouseUp() {
-    document.removeEventListener('mousemove', onResizeMouseMove);
-    document.removeEventListener('mouseup', onResizeMouseUp);
+    document.removeEventListener("mousemove", onResizeMouseMove);
+    document.removeEventListener("mouseup", onResizeMouseUp);
   }
 
-  document.body.addEventListener('scroll', () => {
-    draggable.style.top = draggable.offsetTop + window.scrollY + 'px';
-  })
+  document.body.addEventListener("scroll", () => {
+    draggable.style.top = draggable.offsetTop + window.scrollY + "px";
+  });
 }
