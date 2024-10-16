@@ -161,7 +161,7 @@ chrome.runtime.onMessage.addListener(async function (
     // Attach question input event listener
     const questionInput = document.getElementById(
       "--gpt-api-companion-question"
-    ) as HTMLInputElement;
+    ) as HTMLTextAreaElement;
     const chatForm = document.getElementById(
       "--gpt-api-companion-form"
     ) as HTMLFormElement;
@@ -195,7 +195,7 @@ chrome.runtime.onMessage.addListener(async function (
       }
     });
     questionInput?.addEventListener("keypress", async (event) => {
-      if (event.key === "Enter" && !event.shiftKey) {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         event.preventDefault();
         chatForm.dispatchEvent(new Event("submit"));
       }
@@ -227,9 +227,12 @@ async function createSummaryWindow(defaultModel: Model) {
         <!-- Summary will be displayed here -->
       </div>
       <form id="--gpt-api-companion-form" style="display: flex; flex-direction: column;">
-        <label for="gpt-summary-question" style="display: block; margin-bottom: .5rem;">Ask further:</label>
         <div style="display: flex">
-          <input type="text" id="--gpt-api-companion-question" style="width: 100%; padding: .5rem; border: 1px solid #ccc; margin-right: 4px;" />
+          <textarea
+            id="--gpt-api-companion-question"
+            style="width: 100%; padding: .5rem; border: 1px solid #ccc; margin-right: 4px;"
+            placeholder="Ask follow-up questions"
+          ></textarea>
           <select id="--gpt-api-companion-model" style="padding: .5rem; border: 1px solid #ccc; margin-right: 4px;">
             ${Object.values(Model)
               .map(
