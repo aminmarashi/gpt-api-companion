@@ -41,10 +41,6 @@ export class Chat {
       throw new Error("Chat history element not found.");
     }
     const messageElement = document.createElement("div");
-    messageElement.className =
-      sender === "user"
-        ? "my-2 p-2 rounded-md text-gray-800"
-        : "my-2 bg-gray-100 p-2 rounded-md text-gray-800";
     messageElement.innerHTML = `<strong>${RolesToPrompt[sender]}:</strong> ${(
       await renderMarkdown(message)
     )

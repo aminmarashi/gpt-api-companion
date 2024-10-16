@@ -213,12 +213,20 @@ async function createSummaryWindow(defaultModel: Model) {
   const windowWrapper = document.createElement("div");
   windowWrapper.id = "--gpt-api-companion-summary-window";
   windowWrapper.innerHTML = `
-    <div id="draggable" style="all:revert; position: fixed; top: 0; background-color: white; color: black; z-index: 10000; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; max-height: 75vh; max-width: 75%; display: flex; flex-direction: column; justify-content: space-between; font-size: medium;">
-      <style>
+    <div id="draggable" style="position: fixed; top: 0; z-index: 10000; padding: 10px; border: 1px solid #ccc; box-sizing: border-box; max-height: 75vh; max-width: 75%; display: flex; flex-direction: column; justify-content: space-between;">
+    <style>
+        #--gpt-api-companion-summary-window * {
+            color: black !important;
+            background-color: white !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important; /* Force font family */
+            font-size: medium;
+            text-align: left !important; /* Ensure consistent text alignment */
+        }
         .hidden {
           display: none;
         }
-      </style>
+    </style>
+
       <div id="header" style="cursor: move; display: flex; justify-content: space-between; align-items: center;">
         <h3>Summary</h3>
         <button id="--gpt-api-companion-window-close" style="border: none; background-color: transparent; cursor: pointer; font-size: 18px;">x</button>
