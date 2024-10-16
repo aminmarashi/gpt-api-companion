@@ -111,7 +111,7 @@ chrome.runtime.onMessage.addListener(async function (
         });
     };
     if (apiToken) {
-      gptApiClient.setModel(getGPTModel(summarizerModel));
+      gptApiClient.setModel(getGPTModel(summarizerModel as Model));
       gptApiClient.setApiKey(apiToken);
       try {
         let text = "";

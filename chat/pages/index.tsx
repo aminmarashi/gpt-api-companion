@@ -245,7 +245,9 @@ export default function Home() {
 
       gptApiClient.setApiKey(apiToken);
       if (modelSelectRef.current!.value) {
-        gptApiClient.setModel(getGPTModel(modelSelectRef.current!.value));
+        gptApiClient.setModel(
+          getGPTModel(modelSelectRef.current!.value as Model)
+        );
       }
       try {
         setIsLoading(true);

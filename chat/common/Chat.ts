@@ -1,14 +1,9 @@
 import { renderMarkdown } from "./markdown";
 import { Message, Model, Role, RolesToPrompt } from "./types";
 import GPT3Tokenizer from "gpt3-tokenizer";
+import { limits } from "./utils";
 
 const tokenizer = new GPT3Tokenizer({ type: "gpt3" }); // or 'codex'
-
-const limits = {
-  [Model.GPT3_5_TURBO]: 16384,
-  [Model.GPT4]: 8192,
-  [Model.GPT4_32K]: 32768,
-};
 
 export class Chat {
   private element: HTMLElement;

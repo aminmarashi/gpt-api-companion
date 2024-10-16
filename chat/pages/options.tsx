@@ -11,7 +11,7 @@ import { Model } from "@/common/types";
 export default function Options() {
   const optionsFormRef = useRef<HTMLFormElement>(null);
   const apiTokenRef = useRef<HTMLInputElement>(null);
-  const defaultModelRef = useRef<HTMLInputElement>(null);
+  const defaultModelRef = useRef<HTMLSelectElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [initialized, setInitialized] = useState<boolean>(false);

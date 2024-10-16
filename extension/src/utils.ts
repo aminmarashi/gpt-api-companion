@@ -41,10 +41,10 @@ export const limits = {
   [Model.O1_MINI]: 128000,
 };
 
-export function getGPTModel(modelValue: string): Model {
-  for (const model in Model) {
-    if (Model[model] === modelValue) {
-      return Model[model];
+export function getGPTModel(modelValue: Model): Model {
+  for (const [key, value] of Object.entries(Model)) {
+    if (value === modelValue) {
+      return Model[key as keyof typeof Model];
     }
   }
   return Model.GPT_4O;
