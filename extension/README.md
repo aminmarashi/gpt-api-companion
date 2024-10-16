@@ -2,6 +2,8 @@
 
 GPT API Companion is a Chrome extension that enhances your experience with the GPT API. With this extension, you can interact with the GPT API directly from your browser, summarize selected text, and even summarize entire web pages.
 
+[Link to the extension](https://chromewebstore.google.com/detail/gpt-api-companion/bdaanmhmamgpeppfdajedeliilghopol)
+
 ## Features
 
 1. Chat with the GPT API in a separate Chrome tab.
@@ -49,8 +51,6 @@ yarn build
 - HTML
 - Tailwind CSS
 - Chrome Extension APIs
-
-<a href="https://www.patreon.com/bePatron?u=47066749" data-patreon-widget-type="become-patron-button">Become a Patron!</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 
 ## License
 
