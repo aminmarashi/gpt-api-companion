@@ -4,8 +4,9 @@ import { Message, Model } from "./common/types";
 import {
   getApiToken,
   getGPTModel,
-  getsummarizerModel,
+  getDefaultModel,
   safeGetSelectedText,
+  setDefaultModel,
 } from "./utils";
 import { convert } from "html-to-text";
 import { AES, SHA256, enc } from "crypto-js";
@@ -67,12 +68,14 @@ chrome.runtime.onMessage.addListener(async function (
   sendResponse
 ) {
   const run = async () => {
+    const defaultModel = await getDefaultModel();
     let summary = document.getElementById(
       "--gpt-api-companion-summary"
     ) as HTMLDivElement;
     if (!summary) {
-      createSummaryWindow();
+      await createSummaryWindow(defaultModel);
     }
+
     const summaryWindow = document.getElementById(
       "--gpt-api-companion-summary-window"
     ) as HTMLDivElement;
@@ -85,7 +88,6 @@ chrome.runtime.onMessage.addListener(async function (
       "--gpt-api-companion-spinner"
     ) as HTMLDivElement;
     const apiToken = await getApiToken();
-    const summarizerModel = await getsummarizerModel();
     const chat = new Chat(summary);
     let history: History | undefined = undefined;
 
@@ -110,8 +112,15 @@ chrome.runtime.onMessage.addListener(async function (
           history = decryptHistory(data, apiToken).slice(-1)[0];
         });
     };
+    const selectedModel = document.getElementById(
+      "--gpt-api-companion-model"
+    ) as HTMLSelectElement;
+    const selectedModelValue = selectedModel.value as Model;
+    if (selectedModelValue !== defaultModel) {
+      await setDefaultModel(selectedModelValue);
+    }
     if (apiToken) {
-      gptApiClient.setModel(getGPTModel(summarizerModel as Model));
+      gptApiClient.setModel(getGPTModel(selectedModelValue));
       gptApiClient.setApiKey(apiToken);
       try {
         let text = "";
@@ -158,6 +167,14 @@ chrome.runtime.onMessage.addListener(async function (
     ) as HTMLFormElement;
     chatForm.addEventListener("submit", async (event) => {
       event.preventDefault();
+      const selectedModel = document.getElementById(
+        "--gpt-api-companion-model"
+      ) as HTMLSelectElement;
+      const selectedModelValue = selectedModel.value as Model;
+      if (selectedModelValue !== defaultModel) {
+        gptApiClient.setModel(getGPTModel(selectedModelValue));
+        await setDefaultModel(selectedModelValue);
+      }
       const question = questionInput.value.trim();
       if (question) {
         chat.appendMessage({
@@ -192,7 +209,7 @@ chrome.runtime.onMessage.addListener(async function (
   }
 });
 
-function createSummaryWindow() {
+async function createSummaryWindow(defaultModel: Model) {
   const windowWrapper = document.createElement("div");
   windowWrapper.id = "--gpt-api-companion-summary-window";
   windowWrapper.innerHTML = `
@@ -213,6 +230,16 @@ function createSummaryWindow() {
         <label for="gpt-summary-question" style="display: block; margin-bottom: .5rem;">Ask further:</label>
         <div style="display: flex">
           <input type="text" id="--gpt-api-companion-question" style="width: 100%; padding: .5rem; border: 1px solid #ccc; margin-right: 4px;" />
+          <select id="--gpt-api-companion-model" style="padding: .5rem; border: 1px solid #ccc; margin-right: 4px;">
+            ${Object.values(Model)
+              .map(
+                (model) =>
+                  `<option value="${model}" ${
+                    model === defaultModel ? "selected" : ""
+                  }>${model}</option>`
+              )
+              .join("\n")}
+          </select>
           <button style="width: 6rem;">
             <span id="--gpt-api-companion-spinner" class="mr-1 hidden">
               <svg display="inline" style="width: 1rem;" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>.spinner_jCIR{animation:spinner_B8Vq .9s linear infinite;animation-delay:-.9s}.spinner_upm8{animation-delay:-.8s}.spinner_2eL5{animation-delay:-.7s}.spinner_Rp9l{animation-delay:-.6s}.spinner_dy3W{animation-delay:-.5s}@keyframes spinner_B8Vq{0%,66.66%{animation-timing-function:cubic-bezier(0.36,.61,.3,.98);y:6px;height:12px}33.33%{animation-timing-function:cubic-bezier(0.36,.61,.3,.98);y:1px;height:22px}}</style><rect class="spinner_jCIR" x="1" y="6" width="2.8" height="12"/><rect class="spinner_jCIR spinner_upm8" x="5.8" y="6" width="2.8" height="12"/><rect class="spinner_jCIR spinner_2eL5" x="10.6" y="6" width="2.8" height="12"/><rect class="spinner_jCIR spinner_Rp9l" x="15.4" y="6" width="2.8" height="12"/><rect class="spinner_jCIR spinner_dy3W" x="20.2" y="6" width="2.8" height="12"/></svg>

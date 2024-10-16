@@ -23,10 +23,18 @@ export async function getApiToken(): Promise<string> {
   });
 }
 
-export async function getsummarizerModel(): Promise<string> {
+export async function getDefaultModel(): Promise<Model> {
   return new Promise((resolve) => {
-    chrome.storage.sync.get("defaultModel", ({ summarizerModel }) => {
-      resolve(summarizerModel);
+    chrome.storage.sync.get("defaultModel", ({ defaultModel }) => {
+      resolve(defaultModel);
+    });
+  });
+}
+
+export async function setDefaultModel(model: Model): Promise<void> {
+  return new Promise((resolve) => {
+    chrome.storage.sync.set({ defaultModel: model }, () => {
+      resolve();
     });
   });
 }

@@ -1,17 +1,10 @@
 {
   "manifest_version": 3,
   "name": "GPT API Companion",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "A Chrome extension for interacting with GPT API",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "scripting",
-    "contextMenus"
-  ],
-  "host_permissions": [
-    "https://chat.lit.codes/*"
-  ],
+  "permissions": ["activeTab", "storage", "scripting", "contextMenus"],
+  "host_permissions": ["https://chat.lit.codes/*"],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';",
     "sandbox": "sandbox allow-scripts; script-src 'self' 'https://api.openai.com.com/*'; object-src 'self'"
@@ -25,14 +18,8 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "http://*/*",
-        "https://*/*",
-        "file://*/*"
-      ],
-      "js": [
-        "dist/contentScript.js"
-      ],
+      "matches": ["http://*/*", "https://*/*", "file://*/*"],
+      "js": ["dist/contentScript.js"],
       "module": true
     }
   ],
