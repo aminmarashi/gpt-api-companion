@@ -6,17 +6,7 @@ import gptApiClient from "../common/apiClient";
 import Dashboard from "@/components/Dashboard";
 import { AES, SHA256, enc } from "crypto-js";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-
-function getGPTModel(selection: string) {
-  switch (selection) {
-    case "gpt-4-32k":
-      return Model.GPT4_32K;
-    case "gpt-4":
-      return Model.GPT4;
-    default:
-      return Model.GPT3_5_TURBO;
-  }
-}
+import { getGPTModel } from "@/common/utils";
 
 function hash(str: string) {
   return SHA256(str).toString();
@@ -378,8 +368,11 @@ export default function Home() {
                   id="model"
                   className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow m-2"
                 >
-                  <option value="gpt-3.5-turbo">GPT 3.5</option>
-                  <option value="gpt-4">GPT 4</option>
+                  {Object.values(Model).map((model) => (
+                    <option value={model} key={model}>
+                      {model}
+                    </option>
+                  ))}
                 </select>
                 Read more about&nbsp;
                 <a

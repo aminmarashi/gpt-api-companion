@@ -37,5 +37,9 @@ export type Message =
 export enum Model {
   GPT3_5_TURBO = "gpt-3.5-turbo",
   GPT4 = "gpt-4",
-  GPT4_32K = "gpt-4-32k",
+  GPT4_TURBO = "gpt-4-turbo",
+  GPT_4O = "gpt-4o",
+  GPT_4O_MINI = "gpt-4o-mini",
+  O1_PREVIEW = "o1-preview",
+  O1_MINI = "o1-mini",
 }
