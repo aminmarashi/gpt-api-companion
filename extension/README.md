@@ -32,9 +32,10 @@ yarn build
 
 4. Load the extension in Google Chrome:
 
+    0. Run `yarn bundle` to create an extension bundle, then unzip the bundle
     1. Open the Extension Management page by navigating to `chrome://extensions`.
     2. Enable Developer Mode by clicking the toggle switch next to Developer mode.
-    3. Click the LOAD UNPACKED button and select the `dist` directory.
+    3. Click the LOAD UNPACKED button and select the `pack` directory that you extracted from the bundle.
 
 ## Usage
 
