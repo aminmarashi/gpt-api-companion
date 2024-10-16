@@ -33,5 +33,4 @@ export enum Model {
   GPT_4O = "gpt-4o",
   GPT_4O_MINI = "gpt-4o-mini",
   O1_PREVIEW = "o1-preview",
-  O1_MINI = "o1-mini",
 }
