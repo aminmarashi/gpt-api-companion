@@ -4,7 +4,7 @@ chrome.contextMenus.onClicked.addListener(async function (info, tab) {
   try {
     const storage = await chrome.storage.sync.get("apiToken");
     if (!storage.apiToken) {
-      getToken();
+      getOptions();
     }
     const updatedStorage = await chrome.storage.sync.get("apiToken");
     if (!updatedStorage.apiToken) {
@@ -14,9 +14,9 @@ chrome.contextMenus.onClicked.addListener(async function (info, tab) {
       console.log("This extension only works on web pages.");
       return;
     }
-    if (info.menuItemId === "summarize-page") {
-      await chrome.tabs.sendMessage(tab.id, { action: "summarize-page" });
-    } else if (info.menuItemId === "summarize-text") {
+    if (info.menuItemId === "lit-chat") {
+      chrome.tabs.create({ url: "https://chat.lit.codes" });
+    } else {
       await chrome.tabs.sendMessage(tab.id, { action: "summarize-text" });
     }
   } catch (e) {
@@ -24,8 +24,24 @@ chrome.contextMenus.onClicked.addListener(async function (info, tab) {
   }
 });
 
-chrome.action.onClicked.addListener(() => {
-  chrome.tabs.create({ url: "https://chat.lit.codes" });
+chrome.action.onClicked.addListener(async (tab) => {
+  try {
+    const storage = await chrome.storage.sync.get("apiToken");
+    if (!storage.apiToken) {
+      getOptions();
+    }
+    const updatedStorage = await chrome.storage.sync.get("apiToken");
+    if (!updatedStorage.apiToken) {
+      return;
+    }
+    if (!tab || !tab.id) {
+      console.log("This extension only works on web pages.");
+      return;
+    }
+    await chrome.tabs.sendMessage(tab.id, { action: "summarize-page" });
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -36,8 +52,8 @@ chrome.runtime.onInstalled.addListener(async () => {
     contexts: ["selection"],
   });
   chrome.contextMenus.create({
-    id: "summarize-page",
-    title: "Summarize Page",
+    id: "lit-chat",
+    title: "Chat with GPT API",
     contexts: ["all"],
   });
 
@@ -45,7 +61,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     chrome.storage.sync.remove("apiToken");
     const storage = await chrome.storage.sync.get("apiToken");
     if (!storage.apiToken) {
-      getToken();
+      getOptions();
     }
   } catch (e) {
     console.log(e);
@@ -68,7 +84,7 @@ function saveOptions() {
   }
 }
 
-async function getToken() {
+async function getOptions() {
   chrome.tabs.create(
     {
       active: true,
