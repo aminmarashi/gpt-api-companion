@@ -1,5 +1,5 @@
-import { Fragment, useState } from 'react'
-import { Dialog, Transition } from '@headlessui/react'
+import { Fragment, useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
   GlobeEuropeAfricaIcon,
@@ -8,11 +8,11 @@ import {
   PlusIcon,
   WrenchScrewdriverIcon,
   XMarkIcon,
-} from '@heroicons/react/24/outline'
-import { Message } from '@/common/types'
+} from "@heroicons/react/24/outline";
+import { Message } from "@/common/types";
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
 export default function Dashboard({
@@ -23,23 +23,27 @@ export default function Dashboard({
   onNewChatClick,
   children,
 }: {
-  history: { id: string; messages: Message[] }[] | null
-  chatId: string | null
-  onClick: (id: string) => void
-  onDelete: (id: string) => void
-  onNewChatClick: () => void
-  children: React.ReactNode
+  history: { id: string; messages: Message[] }[] | null;
+  chatId: string | null;
+  onClick: (id: string) => void;
+  onDelete: (id: string) => void;
+  onNewChatClick: () => void;
+  children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (!history) {
-    return <>{children}</>
+    return <>{children}</>;
   }
 
   return (
     <div>
       <Transition.Root show={sidebarOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
+        <Dialog
+          as="div"
+          className="relative z-50 lg:hidden"
+          onClose={setSidebarOpen}
+        >
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-linear duration-300"
@@ -73,9 +77,16 @@ export default function Dashboard({
                   leaveTo="opacity-0"
                 >
                   <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-                    <button type="button" className="-m-2.5 p-2.5" onClick={() => setSidebarOpen(false)}>
+                    <button
+                      type="button"
+                      className="-m-2.5 p-2.5"
+                      onClick={() => setSidebarOpen(false)}
+                    >
                       <span className="sr-only">Close sidebar</span>
-                      <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                      <XMarkIcon
+                        className="h-6 w-6 text-white"
+                        aria-hidden="true"
+                      />
                     </button>
                   </div>
                 </Transition.Child>
@@ -85,31 +96,39 @@ export default function Dashboard({
                     <ul role="list" className="flex flex-1 flex-col gap-y-7">
                       <li>
                         <ul role="list" className="-mx-2 space-y-1">
-                          <li onClick={onNewChatClick} className="mt-auto flex justify-center">
+                          <li
+                            onClick={onNewChatClick}
+                            className="mt-auto flex justify-center"
+                          >
                             <NewChatButton onClick={onNewChatClick} />
                           </li>
-                          {history.slice().reverse().map((item) => (
-                            <li key={item.id}>
-                              <div className='flex justify-between'>
-                                <a
-                                  onClick={() => onClick(item.id)}
-                                  className={classNames(
-                                    item.id === chatId
-                                      ? 'bg-gray-800 text-white'
-                                      : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                                    'inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                                  )}
-                                >
-                                  {getTitle(item.messages, 30)}
-                                </a>
-                                <DeleteIcon onClick={() => onDelete(item.id)} />
-                              </div>
-                            </li>
-                          ))}
+                          {history
+                            .slice()
+                            .reverse()
+                            .map((item) => (
+                              <li key={item.id}>
+                                <div className="flex justify-between">
+                                  <a
+                                    onClick={() => onClick(item.id)}
+                                    className={classNames(
+                                      item.id === chatId
+                                        ? "bg-gray-800 text-white"
+                                        : "text-gray-400 hover:text-white hover:bg-gray-800",
+                                      "inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                                    )}
+                                  >
+                                    {getTitle(item.messages, 30)}
+                                  </a>
+                                  <DeleteIcon
+                                    onClick={() => onDelete(item.id)}
+                                  />
+                                </div>
+                              </li>
+                            ))}
                         </ul>
-                      </li>
-                      <li className="mt-auto py-8 flex items-start flex-col">
-                        <BottomLinks />
+                        <div className="fixed bottom-0">
+                          <BottomLinks />
+                        </div>
                       </li>
                     </ul>
                   </nav>
@@ -123,7 +142,7 @@ export default function Dashboard({
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         {/* Sidebar component, swap this element with another sidebar if you like */}
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6">
+        <div className="flex grow flex-col gap-y-5 bg-gray-900 px-6 overflow-y-auto">
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li>
@@ -131,74 +150,97 @@ export default function Dashboard({
                   <li className="flex mt-auto justify-center">
                     <NewChatButton onClick={onNewChatClick} />
                   </li>
-                  {history.slice().reverse().map((item) => (
-                    <li key={item.id}>
-                      <div className='flex justify-between'>
-                        <a
-                          onClick={() => onClick(item.id)}
-                          className={classNames(
-                            item.id === chatId
-                              ? 'bg-gray-800 text-white'
-                              : 'text-gray-400 hover:text-white hover:bg-gray-800',
-                            'inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
-                          )}
-                        >
-                          {getTitle(item.messages, 30)}
-                        </a>
-                        <DeleteIcon onClick={() => onDelete(item.id)} />
-                      </div>
-                    </li>
-                  ))}
+                  {history
+                    .slice()
+                    .reverse()
+                    .map((item) => (
+                      <li key={item.id}>
+                        <div className="flex justify-between">
+                          <a
+                            onClick={() => onClick(item.id)}
+                            className={classNames(
+                              item.id === chatId
+                                ? "bg-gray-800 text-white"
+                                : "text-gray-400 hover:text-white hover:bg-gray-800",
+                              "inline w-full group gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                            )}
+                          >
+                            {getTitle(item.messages, 30)}
+                          </a>
+                          <DeleteIcon onClick={() => onDelete(item.id)} />
+                        </div>
+                      </li>
+                    ))}
                 </ul>
-              </li>
-              <li className="mt-auto py-8 flex items-start flex-col">
-                <BottomLinks />
               </li>
             </ul>
           </nav>
         </div>
+        <BottomLinks />
       </div>
 
       <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-gray-900 px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-        <button type="button" className="-m-2.5 p-2.5 text-gray-400 lg:hidden" onClick={() => setSidebarOpen(true)}>
+        <button
+          type="button"
+          className="-m-2.5 p-2.5 text-gray-400 lg:hidden"
+          onClick={() => setSidebarOpen(true)}
+        >
           <span className="sr-only">Open sidebar</span>
           <Bars3Icon className="h-6 w-6" aria-hidden="true" />
         </button>
-        <div className="flex-1 text-sm font-semibold leading-6 text-white">Dashboard</div>
+        <div className="flex-1 text-sm font-semibold leading-6 text-white">
+          Dashboard
+        </div>
       </div>
 
       {children}
     </div>
-  )
+  );
 }
 
 function DeleteIcon({ onClick }: { onClick: () => void }): JSX.Element {
-  return <button onClick={onClick}>
-    <MinusIcon
-      className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
-  </button>
+  return (
+    <button onClick={onClick}>
+      <MinusIcon
+        className="inline mt-2 h-6 w-6 text-white"
+        aria-hidden="true"
+      />
+    </button>
+  );
 }
 
 function NewChatButton({ onClick }: { onClick: () => void }): JSX.Element {
   return (
     <button onClick={onClick} className="flex items-end">
-      <span className="text-gray-100 pt-4">New chat</span><PlusIcon className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
+      <span className="text-gray-100 pt-4">New chat</span>
+      <PlusIcon className="inline mt-2 h-6 w-6 text-white" aria-hidden="true" />
     </button>
-  )
+  );
 }
 
 function BottomLinks(): JSX.Element {
   return (
-    <>
-      <a className="block text-lg" href="/options"><WrenchScrewdriverIcon className="inline w-4" /> Options</a>
-      <a className="block text-lg" target="_blank" href="https://chrome.google.com/webstore/detail/gpt-api-companion/bdaanmhmamgpeppfdajedeliilghopol"><GlobeEuropeAfricaIcon className="inline w-4" /> Chrome extension</a>
-      <a className="block font-thin mt-2 -mb-4" href="/privacy-and-security"><LockClosedIcon className="inline w-4" /> End-to-end encrypted history</a>
-    </>
-  )
+    <div className="p-2 bg-gray-900">
+      <a className="block text-lg" href="/options">
+        <WrenchScrewdriverIcon className="inline w-4" /> Options
+      </a>
+      <a
+        className="block text-lg"
+        target="_blank"
+        href="https://chrome.google.com/webstore/detail/gpt-api-companion/bdaanmhmamgpeppfdajedeliilghopol"
+      >
+        <GlobeEuropeAfricaIcon className="inline w-4" /> Chrome extension
+      </a>
+      <a className="block font-thin mt-2" href="/privacy-and-security">
+        <LockClosedIcon className="inline w-4" /> End-to-end encrypted history
+      </a>
+    </div>
+  );
 }
 
 function getTitle(messages: Message[], limit: number): string {
-  const titleMessage = messages.find((message) => !message.hide && !(message as any).system) || {}
-  const [sender] = Object.keys(titleMessage)
-  return (titleMessage as any)[sender].slice(0, limit)
+  const titleMessage =
+    messages.find((message) => !message.hide && !(message as any).system) || {};
+  const [sender] = Object.keys(titleMessage);
+  return (titleMessage as any)[sender].slice(0, limit);
 }
