@@ -195,7 +195,7 @@ chrome.runtime.onMessage.addListener(async function (
       }
     });
     questionInput?.addEventListener("keypress", async (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
         chatForm.dispatchEvent(new Event("submit"));
       }
